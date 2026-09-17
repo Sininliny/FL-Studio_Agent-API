@@ -37,6 +37,9 @@ def main():
     fake = load_fake()
     home = tempfile.mkdtemp(prefix="flslacker-smoke-")
     os.environ["FLSLACKER_HOME"] = home
+    fl_scripts = os.path.join(home, "fl-user", "Slacker")  # never the real FL user folder
+    os.makedirs(fl_scripts)
+    os.environ["FLSLACKER_FL_SCRIPT_DIR"] = fl_scripts
 
     # Borrow the protocol helpers from the generated script itself.
     helpers = fake.make_module()
@@ -122,11 +125,41 @@ def main():
     fake.run_script(read("Slacker Apply.pyscript"), module)
     assert "no pending apply jobs" in host.messages[-1].lower(), host.messages[-1]
 
-    # Probe writes a report without pairing requirements.
+    # Probe writes a report without pairing requirements (the companion creates the folder).
+    os.makedirs(os.path.join(home, "probe"))
     host.dialog_responder = None
     fake.run_script(read("Slacker Probe.pyscript"), module)
     reports = os.listdir(os.path.join(home, "probe"))
     assert len(reports) == 1, (reports, host.messages)
+    report = ns["load_json_file"](os.path.join(home, "probe", reports[0]))
+    assert report["bridge_file_access"] == "reads_ok", report["file_access"]
+    assert report["report_saved"] is True and report["file_access"]["writes_tested"] is False
+    assert sorted(os.listdir(fl_scripts)) == [], "probe left scratch files behind"
+
+    # A host that refuses file access in the FL Slacker folder, as FL 26.1.6 does.
+    refusing = fake.FakeHost(refused_paths=[home])
+    blocked = fake.make_module(refusing, notes)
+    before = blocked.score.dump()
+    fresh = ns["make_envelope"](
+        secret, "capture_request", session_id, 3,
+        {"job_id": str(uuid.uuid4()), "scope": "selected", "purpose": "capture", "target_label": None}, 600,
+    )
+    ns["atomic_write_text"](os.path.join(session_dir, "requests"), fresh["request_id"] + ".json",
+                            ns["canonical_dumps"](fresh))
+    for name in ("Slacker Capture.pyscript", "Slacker Apply.pyscript"):
+        refusing.dialog_responder = lambda dialog: {"Capture": 1, "Job": 1, "Action": 0}
+        fake.run_script(read(name), blocked)
+        assert refusing.dialogs == [], name  # refused before any dialog
+        assert refusing.messages[-1].count("UNSUPPORTED_CAPABILITY (bridge.mailbox)") == 1, refusing.messages[-1]
+        assert "SystemError" in refusing.messages[-1]
+    assert blocked.score.dump() == before
+    assert os.listdir(os.path.join(session_dir, "snapshots")) == snaps
+    assert ns["read_claim"](session_dir, fresh["request_id"]) is None
+
+    fake.run_script(read("Slacker Probe.pyscript"), blocked)
+    assert "File bridge: BLOCKED" in refusing.messages[-1], refusing.messages[-1]
+    assert "NOT saved" in refusing.messages[-1] and "import-report" in refusing.messages[-1]
+    assert len(os.listdir(os.path.join(home, "probe"))) == 1
     print("SMOKE OK", sys.version.split()[0], time.strftime("%H:%M:%S"))
 
 

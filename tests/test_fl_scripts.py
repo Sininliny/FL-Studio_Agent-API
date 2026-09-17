@@ -56,6 +56,13 @@ def test_probe_report(home, service, fl):
     assert report["modules"]["json"] is True
     assert report["host"]["fl"]["version"] is None  # not running inside FL
     assert set(report["note_attributes"]) >= {"number", "time", "length", "clone"}
+    assert report["bridge_file_access"] == "reads_ok" and report["report_saved"] is True
+    assert report["file_access"]["writes_tested"] is False
+    home_access = report["file_access"]["companion_home"]
+    assert home_access == {"path": str(home), "exists": True, "list": "ok", "read": "ok"}
+    assert report["file_access"]["fl_user_scripts"] == {"path": str(fl.fl_script_dir), "exists": False}
+    # The read-only probe leaves no scratch files anywhere.
+    assert sorted(p.name for p in home.iterdir() if p.name.startswith(".access")) == []
 
 
 def _fake_fl_modules(api_version=38):

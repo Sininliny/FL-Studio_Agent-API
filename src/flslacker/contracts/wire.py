@@ -50,9 +50,50 @@ MESSAGE_KINDS = {
 }
 MAILBOX_FOLDERS = ("requests", "responses", "snapshots", "claims")
 
+# Reports FL could not save are printed to its Script output as base64 between these lines:
+#   FLSLACKER-REPORT-BEGIN <stem> <byte length>
+#   <base64 lines>
+#   FLSLACKER-REPORT-END <sha256 of the decoded bytes>
+REPORT_BEGIN = "FLSLACKER-REPORT-BEGIN"
+REPORT_END = "FLSLACKER-REPORT-END"
+REPORT_LINE_CHARS = 160
+
 
 class BridgeError(Exception):
     pass
+
+
+class BridgeUnavailable(BridgeError):
+    """The host refused a file operation the mailbox needs (for example FL's script sandbox)."""
+
+
+def bridge_unavailable_text(action, exc):
+    return (
+        "UNSUPPORTED_CAPABILITY (bridge.mailbox): FL Studio did not let this script %s files in the "
+        "FL Slacker folder (%s). The file bridge cannot work in this FL build, so nothing was recorded "
+        "or changed. Run Slacker Probe for details and see `flslacker doctor`." % (action, type(exc).__name__)
+    )
+
+
+# FL 26.1.6's audit hook makes refused calls fail with SystemError ("returned NULL without setting an
+# exception"), or with TypeError("bad argument type for built-in operation") when it cannot parse the
+# event arguments. Python-level audit hooks conventionally raise RuntimeError. Ordinary I/O errors stay OSError.
+HOST_REFUSAL_ERRORS = (SystemError, RuntimeError)
+HOST_BAD_ARGUMENT = "bad argument type for built-in operation"
+
+
+def is_host_refusal(exc):
+    return isinstance(exc, HOST_REFUSAL_ERRORS) or (isinstance(exc, TypeError) and str(exc) == HOST_BAD_ARGUMENT)
+
+
+def bridge_call(action, function, *args):
+    """Run a mailbox file operation; host refusals (not ordinary I/O errors) become BridgeUnavailable."""
+    try:
+        return function(*args)
+    except Exception as exc:
+        if is_host_refusal(exc):
+            raise BridgeUnavailable(bridge_unavailable_text(action, exc))
+        raise
 
 
 def utc_iso(epoch=None):
@@ -115,9 +156,10 @@ def atomic_write_text(directory, name, text):
     if len(data) > MAX_MESSAGE_BYTES:
         raise BridgeError("message exceeds size limit")
     temp = os.path.join(directory, ".tmp-" + uuid.uuid4().hex)
-    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600)
+    # Builtin open() with a mode string: FL's script sandbox inspects the mode of "open" audit events.
+    handle = open(temp, "xb")
     try:
-        with os.fdopen(fd, "wb") as handle:
+        with handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
@@ -125,7 +167,7 @@ def atomic_write_text(directory, name, text):
     except Exception:
         try:
             os.remove(temp)
-        except OSError:
+        except Exception:  # keep the original error even if the host also refuses the removal
             pass
         raise
     return os.path.join(directory, name)
@@ -156,10 +198,10 @@ def try_claim(session_dir, request_id, holder):
     """Exclusively create the claim for ``request_id``. Returns False if already claimed."""
     path = claim_path(session_dir, request_id)
     try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600)
+        handle = open(path, "xb")
     except FileExistsError:
         return False
-    with os.fdopen(fd, "wb") as handle:
+    with handle:
         handle.write(holder.encode("utf-8")[:200])
         handle.flush()
         os.fsync(handle.fileno())
@@ -244,7 +286,9 @@ def read_pairing(base):
             "FL Slacker companion is not paired. Start it with `flslacker serve` and try again."
         )
     try:
-        pairing = load_json_file(path, 64 * 1024)
+        pairing = bridge_call("read", load_json_file, path, 64 * 1024)
+    except BridgeUnavailable:
+        raise
     except (OSError, ValueError, BridgeError) as exc:
         raise BridgeError("pairing file is unreadable: " + str(exc)[:120])
     if not isinstance(pairing, dict) or pairing.get("protocol") != PROTOCOL:

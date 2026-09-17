@@ -42,25 +42,28 @@ _env_lock = threading.RLock()
 
 
 @contextmanager
-def _home(home: Path):
+def _environment(values: dict[str, str]):
     with _env_lock:
-        previous = os.environ.get("FLSLACKER_HOME")
-        os.environ["FLSLACKER_HOME"] = str(home)
+        previous = {key: os.environ.get(key) for key in values}
+        os.environ.update(values)
         try:
             yield
         finally:
-            if previous is None:
-                os.environ.pop("FLSLACKER_HOME", None)
-            else:
-                os.environ["FLSLACKER_HOME"] = previous
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
 
 class FakeFl:
     """One fake Piano Roll with a fake score and the Slacker scripts."""
 
     def __init__(self, home: Path, notes: list[dict] | None = None, host: fake.FakeHost | None = None,
-                 label: str = "Demo pattern") -> None:
+                 label: str = "Demo pattern", fl_script_dir: Path | None = None) -> None:
         self.home = Path(home)
+        # Stand-in for <FL user data>/Settings/Piano roll scripts/Slacker, probed by Slacker Probe.
+        self.fl_script_dir = Path(fl_script_dir) if fl_script_dir else self.home / "fake-fl-user" / "Slacker"
         self.host = host or fake.FakeHost()
         self.module = fake.make_module(self.host, notes if notes is not None else DEMO_NOTES)
         self.label = label
@@ -96,7 +99,7 @@ class FakeFl:
     def _run(self, name: str, responder: Callable[[Any], Any]) -> str | None:
         self.host.dialog_responder = responder
         before = len(self.host.messages)
-        with _home(self.home):
+        with _environment({"FLSLACKER_HOME": str(self.home), "FLSLACKER_FL_SCRIPT_DIR": str(self.fl_script_dir)}):
             fake.run_script(self.sources[name], self.module, filename=name)
         self.host.dialog_responder = None
         return self.host.messages[-1] if len(self.host.messages) > before else None

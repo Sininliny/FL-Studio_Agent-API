@@ -348,9 +348,9 @@ and the difference is listed under *Deviations and open items*.
 
 ## Status against the milestones
 
-| Milestone | State in 0.1.0 |
+| Milestone | State in 0.1.3 |
 |---|---|
-| M0 host feasibility | Harness complete (`Slacker Probe`, `flslacker m0`, `flslacker doctor`). Documentation- and interpreter-level evidence recorded for FL 26.1.6.5639; **no run inside FL yet**. Writes stay `unavailable` until a local M0 record exists (or `--allow-unverified-host`). |
+| M0 host feasibility | **Blocked on FL 26.1.6.5639.** Inside FL, Piano Roll scripts cannot read or create files in the FL Slacker folder (`open`/`os.mkdir` fail with `SystemError`, consistent with a native audit hook), and reads work only in FL's own script folder, which refuses writes — so the file mailbox has no usable channel. Repeated refused calls also crash FL (heap corruption `0xc0000374`), so Slacker Probe is read-only from 0.1.3. Per §5.3 the bridge is recorded as `unsupported` and the scripts stop with an actionable `UNSUPPORTED_CAPABILITY (bridge.mailbox)` result; no alternate control mechanism is installed. The probe maps read access per folder and prints its report when it cannot save it (`flslacker import-report`). |
 | M1 contracts/core | Done: Pydantic contracts, canonicalization and vectors, fake host, dispatcher, policy, immutable plans, SQLite journal, idempotency, replay protection. |
 | M2 real note adapter | Scripts written and exercised against the fake host and FL's embedded interpreter; behavioural claims pending M0. |
 | M3 analysis/UI | Done: motifs, ranked key/chord hypotheses, outliers, exact diff, recipes, guarded restore, browser UI. |

@@ -60,6 +60,9 @@ class CompatibilityRecord:
     def status(self, capability: str) -> str:
         return self.data.get("capabilities", {}).get(capability, {}).get("status", "unverified")
 
+    def note(self, capability: str) -> str:
+        return self.data.get("capabilities", {}).get(capability, {}).get("reason", "")
+
 
 def load_records(home: Path) -> list[CompatibilityRecord]:
     records: list[CompatibilityRecord] = []
@@ -96,10 +99,14 @@ def compute(
     for name in FL_NOTE_CAPABILITIES:
         status_text = record.status(name) if record else "missing"
         verified = status_text == "verified"
-        supported = verified or allow_unverified
+        # Observed as impossible on this build: --allow-unverified-host does not override it.
+        refuted = status_text == "unsupported"
+        supported = verified or (allow_unverified and not refuted)
         limitations = ["requires explicit FL invocation", "coverage: exposed_score", "identity: user_attested"]
         reason = None
-        if not verified:
+        if refuted:
+            reason = f"Unsupported on FL build {build_text} ({fl_build_source}): {record.note(name)}"
+        elif not verified:
             reason = (
                 f"Not verified on FL build {build_text} ({fl_build_source}); record status: {status_text}. "
                 "Run the M0 checklist in docs/COMPATIBILITY.md"
@@ -140,7 +147,7 @@ def compute(
     )
 
     midi_status = record.status("project.metadata") if record else "missing"
-    midi_supported = midi_status == "verified" or allow_unverified
+    midi_supported = midi_status == "verified" or (allow_unverified and midi_status != "unsupported")
     caps.append(
         Capability(
             name="project.metadata",
@@ -151,7 +158,9 @@ def compute(
             identity="none",
             verified_build=fl_build if midi_status == "verified" else None,
             limitations=["optional device_Slacker.py on a dedicated MIDI input", "read-only"],
-            reason=None if midi_status == "verified" else f"MIDI adapter not verified on FL build {build_text}.",
+            reason=None if midi_status == "verified"
+            else f"Unsupported on FL build {build_text}: {record.note('project.metadata')}"
+            if midi_status == "unsupported" else f"MIDI adapter not verified on FL build {build_text}.",
         )
     )
 

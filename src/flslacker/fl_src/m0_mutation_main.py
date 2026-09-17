@@ -143,16 +143,10 @@ def slacker_m0_main():
         slacker_m0_experiments(report)
     except Exception as exc:
         report["error"] = type(exc).__name__ + ": " + str(exc)[:300]
-    try:
-        folder = ensure_private_dir(os.path.join(base_dir(), "probe"))
-        name = "m0-%s-%s.json" % (time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()), uuid.uuid4().hex[:8])
-        atomic_write_text(folder, name, canonical_dumps(report))
-    except Exception as exc:
-        slacker_show("Slacker M0 Mutation Probe\n\nCould not write the report: %s" % str(exc)[:200])
-        return
-    slacker_show("Slacker M0 Mutation Probe\n\nDone%s.\nReport: %s" % (
-        "" if "error" not in report else " with error " + report["error"], name))
+    saved, reason = slacker_emit_report(report, "m0")
+    slacker_show("Slacker M0 Mutation Probe\n\nDone%s.\n%s" % (
+        "" if "error" not in report else " with error " + report["error"], slacker_report_location(saved, reason)))
 
 
 if not globals().get("_SLACKER_NO_AUTORUN"):
-    slacker_m0_main()
+    slacker_run("Slacker M0 Mutation Probe", slacker_m0_main, "Check the Piano Roll for probe notes (pitches 61, 62, 70-72).")

@@ -2,34 +2,40 @@
   "format": "flslacker-compatibility/1",
   "records": [
     {
-      "record_id": "win-fl-26.1.6.5639-docs-2026-09-17",
+      "record_id": "win-fl-26.1.6.5639-2026-09-17",
       "fl_build": "26.1.6.5639",
       "os": "Windows 11 Pro 10.0.26200",
       "os_family": "windows",
       "embedded_python": "3.12.1",
-      "adapter_version": "0.1.0",
+      "adapter_version": "0.1.3",
       "midi_api_version": null,
       "recorded_at": "2026-09-17",
       "evidence": [
         "Installed reference: <FL>/System/Config/Piano roll scripts/Piano roll script reference.txt lists getTimelineSelection, setTimelineSelection, getDefaultNoteProperties, getNextFreeGroupIndex, addInputSurface and Note.clone().",
         "Factory scripts use flp.Note(), note.clone(), score.addNote(), ScriptDialog.AddInputCombo/AddInputCheckbox/AddInputKnob(Int) and GetInputValue.",
         "<FL>/Shared/Python/python.exe 3.12.1 (standalone, outside FL) imports json, hmac, hashlib, os, uuid, tempfile, time, secrets, ctypes.",
-        "tests/embedded_smoke.py passes on that interpreter with a mocked flpianoroll module (mailbox write, claim, capture/apply round trip)."
+        "Inside FL (user run, 2026-09-17): Slacker Capture and Slacker Apply imported json, hmac, hashlib, os, uuid, time and calendar, then failed reading <LOCALAPPDATA>/FLSlacker/bridge/pairing.json while the companion was running: SystemError '<class '_io.FileIO'> returned NULL without setting an exception'.",
+        "Inside FL (user run, 2026-09-17): Slacker Probe 0.1.0 failed creating <LOCALAPPDATA>/FLSlacker/probe: SystemError '<built-in function mkdir> returned NULL without setting an exception'.",
+        "FLEngine_x64.dll imports PySys_AddAuditHook and runs scripts in sub-interpreters (Py_NewInterpreterFromConfig). The errors match a native audit hook that refuses the call without setting an exception.",
+        "Inside FL (user run, Slacker Probe 0.1.1): <LOCALAPPDATA>/FLSlacker: list ok, read (open 'rb') SystemError, create (os.open, no mode string) TypeError 'bad argument type for built-in operation', mkdir SystemError.",
+        "Inside FL (user run, Slacker Probe 0.1.1): <Documents>/Image-Line/FL Studio/Settings/Piano roll scripts/Slacker: list ok, read (open 'rb') ok, create (os.open) SystemError. The FL build could not be read from inside FL (version None).",
+        "Inside FL (user run, Slacker Probe 0.1.2, which attempted several file writes per folder): FL64.exe 26.1.6.5639 CRASHED with heap corruption (Windows Error Reporting APPCRASH, exception 0xc0000374 STATUS_HEAP_CORRUPTION, fault in ntdll). Each refused file call returns NULL to CPython without setting an exception, which leaves the interpreter corrupt; the ~5 refused calls of Probe 0.1.1 survived, the ~10 of Probe 0.1.2 did not. From 0.1.3 the probe is read-only and makes at most one write attempt (its own report save).",
+        "FL's own Chord progression scripts (<FL>/System/Tools/Chord progression) only read files."
       ],
-      "not_evidence": "No script has been run inside FL Studio for this record. Mocks cannot certify compatibility.",
+      "not_evidence": "The MIDI adapter was not run. No workable bridge folder exists on this build: the FL Slacker folder blocks reads and writes, FL's script folder allows reads but refuses writes, and repeated refused file calls destabilize FL. FL can therefore neither read the companion's folder nor write a reply anywhere reachable.",
       "stdlib_modules": {"json": true, "hmac": true, "hashlib": true, "os": true, "uuid": true, "calendar": true, "ctypes": true},
       "selection_semantics": "unverified",
-      "bridge_transport": "mailbox_file: unverified inside FL",
+      "bridge_transport": "mailbox_file: unsupported (FL refuses open() and os.mkdir() in the FL Slacker folder inside Piano Roll scripts)",
       "preview_cancel": "unverified (scripts use the explicit top-level path with ScriptDialog.execute())",
       "undo": "unverified",
       "identity_strength": "user_attested",
       "capabilities": {
-        "bridge.mailbox": {"status": "unverified"},
-        "notes.capture": {"status": "unverified"},
-        "notes.verify": {"status": "unverified"},
-        "notes.patch.update": {"status": "unverified"},
-        "notes.patch.insert": {"status": "unverified"},
-        "notes.patch.delete": {"status": "unverified"},
+        "bridge.mailbox": {"status": "unsupported", "reason": "FL Studio refuses file reads (open) and folder creation (os.mkdir) in the FL Slacker folder inside Piano Roll scripts, so the file mailbox cannot work. See docs/COMPATIBILITY.md."},
+        "notes.capture": {"status": "unsupported", "reason": "Snapshots travel through the file mailbox, which FL refuses on this build (bridge.mailbox)."},
+        "notes.verify": {"status": "unsupported", "reason": "Verification needs a fresh capture through the file mailbox, which FL refuses on this build (bridge.mailbox)."},
+        "notes.patch.update": {"status": "unsupported", "reason": "Apply jobs travel through the file mailbox, which FL refuses on this build (bridge.mailbox)."},
+        "notes.patch.insert": {"status": "unsupported", "reason": "Apply jobs travel through the file mailbox, which FL refuses on this build (bridge.mailbox)."},
+        "notes.patch.delete": {"status": "unsupported", "reason": "Apply jobs travel through the file mailbox, which FL refuses on this build (bridge.mailbox)."},
         "project.metadata": {"status": "unverified"}
       }
     }

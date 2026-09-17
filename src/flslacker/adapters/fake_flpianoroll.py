@@ -5,7 +5,9 @@ under FL's embedded interpreter. It models the documented API only; host behavio
 learned in M0 is configurable (see ``FakeHost``). Mocks cannot certify compatibility.
 """
 
+import os
 import sys
+import threading
 import types
 
 _NOTE_DEFAULTS = (
@@ -30,14 +32,40 @@ _NOTE_FIELD_NAMES = tuple(name for name, _ in _NOTE_DEFAULTS)
 _FLOAT_FIELDS = ("pan", "velocity", "release", "fcut", "fres")
 
 
-class FakeHost:
-    """Host behaviour switches, shared by every object of one fake module."""
+# Audit events for the file operations the scripts use; the first argument is the path.
+FILE_EVENTS = ("open", "os.listdir", "os.scandir", "os.mkdir", "os.rmdir", "os.rename", "os.remove")
+LIST_EVENTS = ("os.listdir", "os.scandir")
+BAD_ARGUMENT = "bad argument type for built-in operation"
+_WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND | os.O_TRUNC
 
-    def __init__(self, ppq=96, expose_selected_only=False, float_quantum=None, fail_after_writes=None):
+
+def _normalize(path):
+    return os.path.normcase(os.path.abspath(str(path)))
+
+
+def _within(path, roots):
+    return any(path == root or path.startswith(root + os.sep) for root in roots)
+
+
+class FakeHost:
+    """Host behaviour switches, shared by every object of one fake module.
+
+    File access as observed inside FL 26.1.6.5639 Piano Roll scripts (listing is always allowed):
+
+    ``refused_paths``: every other file operation is refused. ``open()`` fails with SystemError
+    ("returned NULL without setting an exception"); ``os.open`` (no mode string) with TypeError.
+    ``read_only_paths``: reads succeed; creating, renaming, removing and mkdir fail with SystemError.
+    """
+
+    def __init__(self, ppq=96, expose_selected_only=False, float_quantum=None, fail_after_writes=None,
+                 refused_paths=None, read_only_paths=None):
         self.ppq = ppq
         self.expose_selected_only = expose_selected_only
         self.float_quantum = float_quantum
         self.fail_after_writes = fail_after_writes
+        self.refused_paths = [_normalize(p) for p in (refused_paths or [])]
+        self.read_only_paths = [_normalize(p) for p in (read_only_paths or [])]
+        self.refused = []
         self.writes = 0
         self.messages = []
         self.log = []
@@ -48,6 +76,43 @@ class FakeHost:
         self.writes += 1
         if self.fail_after_writes is not None and self.writes > self.fail_after_writes:
             raise RuntimeError("simulated host failure")
+
+    @property
+    def restricts_files(self):
+        return bool(self.refused_paths or self.read_only_paths)
+
+    def refusal(self, event, args):
+        """The exception FL would raise for this audit event, or None if it is allowed."""
+        if event not in FILE_EVENTS or event in LIST_EVENTS or not args or isinstance(args[0], int):
+            return None
+        try:
+            path = _normalize(os.fsdecode(args[0]))
+        except (TypeError, ValueError):
+            return None
+        null = SystemError("<built-in function %s> returned NULL without setting an exception"
+                           % ("open" if event == "open" else event.split(".", 1)[1]))
+        if _within(path, self.refused_paths):
+            return TypeError(BAD_ARGUMENT) if event == "open" and args[1] is None else null
+        if _within(path, self.read_only_paths):
+            if event != "open":
+                return null
+            mode, flags = args[1], args[2]
+            writing = any(c in mode for c in "wxa+") if isinstance(mode, str) else bool(flags & _WRITE_FLAGS)
+            return null if writing else None
+        return None
+
+
+_script_host = threading.local()
+_hook_installed = []
+
+
+def _audit_hook(event, args):
+    host = getattr(_script_host, "host", None)
+    if host is not None and host.restricts_files:
+        error = host.refusal(event, args)
+        if error is not None:
+            host.refused.append(event)
+            raise error
 
 
 def make_module(host=None, notes=None, markers=None, timeline_selection=(0, 0)):
@@ -265,11 +330,16 @@ def run_script(source, module, filename="<slacker script>"):
     """Execute a generated Piano Roll script against ``module`` as FL would."""
     previous = sys.modules.get("flpianoroll")
     sys.modules["flpianoroll"] = module
+    if module.host.restricts_files and not _hook_installed:
+        sys.addaudithook(_audit_hook)  # permanent, but inert outside run_script
+        _hook_installed.append(True)
+    _script_host.host = module.host
     try:
         namespace = {"__name__": "__slacker_script__", "__file__": filename}
         exec(compile(source, filename, "exec"), namespace)
         return namespace
     finally:
+        _script_host.host = None
         if previous is None:
             sys.modules.pop("flpianoroll", None)
         else:

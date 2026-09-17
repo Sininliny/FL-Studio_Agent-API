@@ -1,4 +1,4 @@
-"""Command line: serve, doctor, install-adapters, uninstall-adapters, mcp, ui, agent, m0 and build tools."""
+"""Command line: serve, doctor, install-adapters, uninstall-adapters, mcp, ui, agent, m0, import-report and build tools."""
 
 from __future__ import annotations
 
@@ -63,9 +63,11 @@ def cmd_serve(args) -> int:
     _setup_logging(settings, args.log_level)
     credentials = Credentials.load_or_create(settings)
     service = Service(settings)
-    installs = hostinfo.installed_fl()
-    service.installed_fl_build = installs[0].version if installs else None
+    if not args.fake:  # the demo's simulated Piano Roll is not the installed FL build
+        installs = hostinfo.installed_fl()
+        service.installed_fl_build = installs[0].version if installs else None
     session = service.start()
+    bridge = next(c for c in service.capability_list() if c.name == "bridge.mailbox")
 
     agents = None
     if settings.ollama_model:
@@ -106,6 +108,8 @@ def cmd_serve(args) -> int:
     print(f"  session {session.session_id} (epoch {session.adapter_epoch}); data in {settings.home}")
     if args.fake:
         print("  FAKE FL MODE: a simulated Piano Roll answers requests automatically. Nothing touches FL Studio.")
+    elif not bridge.supported:
+        print(f"  NOTE: capture and apply are unavailable. {bridge.reason}")
     elif settings.allow_unverified_host:
         print("  WARNING: --allow-unverified-host enables writes that are not verified on this FL build (M0 mode).")
     print("  Open the UI: run `flslacker ui` in another terminal (prints a one-time login code).")
@@ -262,6 +266,42 @@ def cmd_m0(args) -> int:
     return 0
 
 
+def cmd_import_report(args) -> int:
+    from flslacker import reports
+    from flslacker.contracts.wire import REPORT_BEGIN, REPORT_END
+
+    settings = _settings(args)
+    if args.file in (None, "-"):
+        if sys.stdin.isatty():
+            eof = "Ctrl+Z, then Enter" if sys.platform == "win32" else "Ctrl+D"
+            print(f"Paste the lines copied from FL (VIEW > Script output), then press {eof}:", file=sys.stderr)
+        text = sys.stdin.read()
+    else:
+        try:
+            text = Path(args.file).read_text(encoding="utf-8", errors="replace")
+        except FileNotFoundError:
+            print(f"Not imported: {args.file} does not exist. Save the {REPORT_BEGIN} ... {REPORT_END} block "
+                  "from FL (VIEW > Script output) into that file first, or run `flslacker import-report` "
+                  "without a file and paste the block.", file=sys.stderr)
+            return 1
+        except OSError as exc:
+            print(f"Not imported: cannot read {args.file} ({exc.strerror or exc})", file=sys.stderr)
+            return 1
+    try:
+        found = reports.parse(text)
+    except reports.ReportError as exc:
+        print(f"Not imported: {exc}", file=sys.stderr)
+        return 1
+    for report in found:
+        path = reports.save(settings.probe_dir, report)
+        verdict = reports.bridge_verdict(report)
+        detail = f"file bridge: {verdict}" if verdict else ""
+        print(f"Imported {report['kind']} from FL {reports.fl_version_text(report)} -> {path}  {detail}".rstrip())
+    if any(reports.bridge_verdict(report) == "blocked" for report in found):
+        print("FL refuses the file access the bridge needs on this build; see `flslacker doctor` (fl.bridge_access).")
+    return 0
+
+
 def cmd_build_scripts(args) -> int:
     from flslacker import fl_build
 
@@ -363,6 +403,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("m0", help="guided M0 host checklist (needs `serve --allow-unverified-host`)")
     p.set_defaults(func=cmd_m0)
+
+    p = sub.add_parser("import-report",
+                       help="import a Slacker Probe report copied from FL's Script output (file or stdin)")
+    p.add_argument("file", nargs="?", help="text file with the copied lines; '-' or omitted reads stdin")
+    p.set_defaults(func=cmd_import_report)
 
     p = sub.add_parser("build-fl-scripts", help="render the FL-side scripts")
     p.add_argument("--out", default="fl_scripts")

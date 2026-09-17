@@ -21,6 +21,17 @@ python -m pip install -r requirements.lock
 python -m pip install --no-deps -e .
 ```
 
+`flslacker` is only on `PATH` while that environment is active, so activate it in every new
+terminal. In PowerShell, where running `Activate.ps1` is blocked by default, allow it for the
+current window only:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass; & "$env:USERPROFILE\.venvs\fl-slacker\Scripts\Activate.ps1"
+```
+
+(Replace the path with your environment.) Alternatively, call the executable directly:
+`& "<venv>\Scripts\flslacker.exe" doctor`.
+
 Check the environment:
 
 ```bash
@@ -120,6 +131,24 @@ flslacker m0
 
 Then restart `flslacker serve` normally. Save your work before M0 and use a new, disposable
 project.
+
+### "UNSUPPORTED_CAPABILITY (bridge.mailbox)" in FL
+
+Some FL builds (observed on 26.1.6.5639) refuse file access to Piano Roll scripts. The Slacker
+scripts then show this message before opening a dialog and change nothing; before 0.1.1 the same
+condition appeared as a `SystemError ... returned NULL without setting an exception` traceback.
+The file bridge cannot work on such a build, and M0 cannot run there. `flslacker serve` and
+`flslacker doctor` say so. To record exactly what FL allows, run **Slacker Probe** and, if it
+reports that it could not save the report, copy the printed block from *VIEW > Script output*
+into a text file you create (here `probe-copy.txt` in the current folder) and import it:
+
+```bash
+flslacker import-report probe-copy.txt
+```
+
+Or skip the file: run `flslacker import-report` with no argument, paste the block, then press
+Ctrl+Z and Enter (Ctrl+D on macOS). Then `flslacker doctor` shows the result under `fl.bridge_access`. See
+[COMPATIBILITY.md](COMPATIBILITY.md).
 
 ## 4. Connect external agents (MCP)
 

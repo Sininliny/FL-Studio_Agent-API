@@ -8,31 +8,65 @@ and `fls_get_capabilities` show which record applies.
 Capability states: `supported`, `requires_user_action` (works, but you run a script in FL),
 `not_connected` (FL has not reported in this session), `unavailable` (with a reason).
 
+Record statuses: `verified` (observed working), `unverified` (not yet observed; enabled only with
+`--allow-unverified-host`), `failed` (an M0 step did not pass) and `unsupported` (observed to be
+impossible on that build; `--allow-unverified-host` does **not** enable it).
+
 ## Recorded evidence: FL Studio 26.1.6.5639 (Windows 11 Pro 10.0.26200)
 
-Recorded 2026-09-17, adapter 0.1.0. **No script has run inside FL for this record.**
+Recorded 2026-09-17, adapter 0.1.3. **The file bridge does not work on this build.** FL refuses
+file access to Piano Roll scripts, and repeated refused calls crash FL, so capture, verify and
+apply are `unsupported`: FL Slacker cannot read or edit notes in this FL build.
 
 | Item | Evidence | Status |
 |---|---|---|
+| File access in the FL Slacker folder (`%LOCALAPPDATA%\FLSlacker`) | Inside FL, Slacker Capture and Apply failed reading `bridge\pairing.json` with `SystemError: <class '_io.FileIO'> returned NULL without setting an exception`; the probe's folder-creation failed the same way | **refused inside FL** |
+| File access per folder (Slacker Probe 0.1.1, inside FL) | FL Slacker folder: list ok, read `SystemError`, create `TypeError`/`SystemError`, mkdir `SystemError`. FL's script folder (`Settings\Piano roll scripts\Slacker`): list ok, **read ok**, create `SystemError`. FL's own Chord progression scripts also only read files. | observed inside FL |
+| Repeated refused calls crash FL | Slacker Probe 0.1.2, which attempted several writes per folder (~10 refused calls), crashed FL64.exe with **heap corruption** (APPCRASH `0xc0000374`). A refused call returns NULL to CPython without setting an exception, corrupting the interpreter; ~5 such calls (Probe 0.1.1) survived, ~10 did not. | observed inside FL |
+| Cause | `FLEngine_x64.dll` imports `PySys_AddAuditHook` and runs scripts in sub-interpreters; the refusals and the crash are what a native audit hook produces when it blocks a call without setting an exception. Image-Line does not document this restriction. | inferred |
+| Is there a workable bridge folder? | No. FL can't read the companion's folder, and can't write a reply anywhere it can read (its own script folder allows reads but refuses writes). So the file mailbox has neither an inbound nor an outbound channel. | **no** |
+| `bridge.mailbox`, `notes.capture`, `notes.verify`, `notes.patch.update/insert/delete` | Depend on the file bridge | **unsupported** |
+| Standard-library imports inside FL | `json`, `hmac`, `hashlib`, `os`, `uuid`, `time`, `calendar` imported (the scripts got as far as reading the pairing file) | observed inside FL |
 | Installed Piano Roll reference | Lists `getTimelineSelection`, `setTimelineSelection`, `getDefaultNoteProperties`, `getNextFreeGroupIndex`, `addInputSurface`, `ScriptDialog.execute()`, `Note.clone()`; note fields as used by FL Slacker | documented |
 | Factory scripts | Use `flp.Note()`, `note.clone()`, `score.addNote()`, `AddInputCombo`, `AddInputCheckbox`, `AddInputKnob(Int)`, `GetInputValue` (capitalized forms) | documented |
-| Embedded interpreter | `Shared/Python/python.exe` is CPython 3.12.1; `json`, `hmac`, `hashlib`, `os`, `uuid`, `calendar`, `ctypes` import | verified outside FL |
-| Mailbox prerequisites | Signing, tamper rejection, atomic write and exclusive claim pass on that interpreter (`flslacker doctor`) | verified outside FL |
-| Script logic | Capture/Apply/Probe round trip passes on that interpreter against a mocked `flpianoroll` (`tests/embedded_smoke.py`) | mock only |
-| `bridge.mailbox` inside FL | – | unverified |
-| `notes.capture`, `notes.verify` | – | unverified |
-| `notes.patch.update/insert/delete` | – | unverified |
-| Selection semantics (`noteCount` with a selection) | – | unverified |
-| Script runs once per invocation, not on menu scan | – | unverified |
-| Dialog cancel writes nothing | – | unverified |
-| Undo grouping of one script run | – | unverified |
-| Note order after time edits; proxy stability | – | unverified (see M0 mutation probe) |
-| Float quantization of velocity/pan/etc. | – | unverified (verification tolerates ±0.01) |
-| `project.metadata` (MIDI adapter) | – | unverified; needs a MIDI input |
+| Embedded interpreter outside FL | `Shared/Python/python.exe` is CPython 3.12.1; signing, atomic write and exclusive claim pass there (`flslacker doctor`), and the script round trip passes against a mocked `flpianoroll` (`tests/embedded_smoke.py`). This does not show what FL allows. | outside FL only |
+| Selection semantics, run-once behaviour, dialog cancel, undo grouping, note order after edits, float quantization | – | unverified (M0 cannot run without the bridge) |
+| `project.metadata` (MIDI adapter) | MIDI controller scripts may be restricted differently; not run | unverified |
 
-Because the write capabilities are unverified, `flslacker serve` reports them as
-`unavailable` until a local M0 record exists. `--allow-unverified-host` enables them as
-`EXPERIMENTAL`, intended only for running M0.
+What this means in practice:
+
+- The Slacker scripts detect the refusal before opening any dialog and show an
+  `UNSUPPORTED_CAPABILITY (bridge.mailbox)` message. Nothing is recorded or changed.
+- **Slacker Probe is read-only** (from 0.1.3): it lists and makes at most one read per folder, plus
+  one write attempt (saving its own report). It never writes into a folder FL watches. This is a
+  direct response to the 0.1.2 crash — probing writes inside FL is not safe on this build.
+- If FL refuses that report save, the probe reports the bridge as **BLOCKED**, even before the
+  companion is paired, because the mailbox writes in the same folder. `doctor` applies the same
+  rule to reports printed by older probes.
+- `flslacker serve` prints a note at startup, `fls_get_capabilities` reports the FL capabilities
+  as `unavailable` with the reason, and `flslacker doctor` fails the `compatibility` check.
+- The spec (§5.3) requires stopping here rather than silently switching to another control
+  mechanism. FL Slacker does not try to get around FL's restriction (for example through
+  `ctypes`, Win32 calls, sockets or the registry).
+
+If a later FL build or a Slacker Probe report shows that file access works, `flslacker m0` can
+record that locally (`compatibility.local.json` takes precedence over the shipped record).
+
+### Reports FL cannot save
+
+When FL refuses the write, Slacker Probe (and the M0 mutation probe) print the report to FL's
+Script output window (VIEW > Script output) between `FLSLACKER-REPORT-BEGIN` and `FLSLACKER-REPORT-END` lines (base64 with
+a SHA-256 checksum). Copy the whole block into a text file you create (here `probe-copy.txt`), then:
+
+```bash
+flslacker import-report probe-copy.txt
+```
+
+Without a file argument, `import-report` reads the pasted block from the terminal (end with
+Ctrl+Z and Enter on Windows, Ctrl+D elsewhere).
+
+The importer checks the length and checksum and saves the report in `<data>/probe/`, where
+`doctor` summarizes it (`fl.bridge_access`).
 
 ## M0 checklist
 

@@ -4,6 +4,7 @@ Runs inside FL Studio's embedded interpreter with ``flp`` bound to ``flpianoroll
 Inlined after ``canonical`` and ``wire``; STDLIB ONLY.
 """
 
+import hashlib
 import os
 import sys
 import time
@@ -12,7 +13,7 @@ import uuid
 from flslacker.contracts.canonical import *  # fl-inline: skip
 from flslacker.contracts.wire import *  # fl-inline: skip
 
-SCRIPT_VERSION = "0.1.0"
+SCRIPT_VERSION = "0.1.3"
 RESPONSE_TTL_SECONDS = 7 * 24 * 3600
 
 
@@ -37,7 +38,10 @@ def slacker_fl_version():
     try:
         import ctypes
         from ctypes import wintypes
-
+    except Exception as exc:
+        # Piano Roll scripts have been seen to get ImportError here; the companion reads the build from the install.
+        return {"executable": None, "version": None, "error": "ctypes unavailable: %s" % type(exc).__name__}
+    try:
         buffer = ctypes.create_unicode_buffer(32768)
         kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
         kernel32.GetModuleFileNameW.argtypes = [wintypes.HMODULE, wintypes.LPWSTR, wintypes.DWORD]
@@ -123,6 +127,8 @@ class SlackerContext:
     """Paired mailbox session as seen from FL."""
 
     def __init__(self):
+        # read_pairing() reads pairing.json first, so a host that refuses file reads (as FL
+        # 26.1.6.5639 does) raises BridgeUnavailable here, before any dialog and before any write.
         self.base = base_dir()
         pairing = read_pairing(self.base)
         self.session_id = pairing["session_id"]
@@ -137,14 +143,16 @@ class SlackerContext:
     def pending(self, kinds):
         folder = os.path.join(self.dir, "requests")
         found = []
-        for name in sorted(os.listdir(folder)):
+        for name in sorted(bridge_call("list", os.listdir, folder)):
             if name.startswith(".") or not name.endswith(".json"):
                 continue
             request_id = name[:-5]
-            if not is_uuid(request_id) or read_claim(self.dir, request_id) is not None:
+            if not is_uuid(request_id) or bridge_call("read", read_claim, self.dir, request_id) is not None:
                 continue
             try:
-                envelope = load_json_file(os.path.join(folder, name))
+                envelope = bridge_call("read", load_json_file, os.path.join(folder, name))
+            except BridgeUnavailable:
+                raise
             except Exception:
                 continue
             if check_envelope(self.secret, envelope, self.session_id, kinds) is not None:
@@ -156,16 +164,92 @@ class SlackerContext:
         return found
 
     def claim(self, request_id, holder):
-        return try_claim(self.dir, request_id, holder)
+        return bridge_call("write", try_claim, self.dir, request_id, holder)
 
     def send(self, kind, body, in_reply_to=None):
         envelope = make_envelope(
             self.secret, kind, self.session_id, time.time_ns(), body, RESPONSE_TTL_SECONDS, in_reply_to
         )
         folder = os.path.join(self.dir, MESSAGE_KINDS[kind][1])
-        atomic_write_text(folder, str(uuid.uuid4()) + ".json", canonical_dumps(envelope))
+        bridge_call("write", atomic_write_text, folder, str(uuid.uuid4()) + ".json", canonical_dumps(envelope))
         return envelope
 
 
 def slacker_short(identifier):
     return str(identifier)[:8]
+
+
+def slacker_run(title, main, after_failure):
+    """Run a script entry point; never let FL show a raw traceback for an expected condition."""
+    try:
+        main()
+    except BridgeError as exc:
+        slacker_show(title + "\n\n" + str(exc))
+    except Exception as exc:
+        text = "%s: %s" % (type(exc).__name__, str(exc)[:300])
+        slacker_log(title + " failed: " + text)
+        try:
+            import traceback
+
+            traceback.print_exc()  # FL shows stdout/stderr in its Script output window
+        except Exception:
+            pass
+        slacker_show("%s\n\nUnexpected error: %s\n\n%s" % (title, text, after_failure))
+
+
+def slacker_emit_report(report, stem):
+    """Save ``report`` to <home>/probe/ if the host allows it; always print it to the Script output.
+
+    Also records the outcome in ``report`` so the saved and printed copies both carry it.
+    Returns (saved file name or None, reason it was not saved or None).
+    """
+    # Optimistic, so a successfully saved file records report_saved=True; corrected below on failure.
+    report["report_saved"] = True
+    report["report_save_error"] = None
+    report["report_save_refused"] = False
+    saved, reason = None, None
+    folder = os.path.join(base_dir(), "probe")
+    name = "%s-%s-%s.json" % (stem, time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()), uuid.uuid4().hex[:8])
+    if not os.path.isdir(folder):
+        reason = "the companion has not created %s yet" % folder
+    else:
+        try:
+            atomic_write_text(folder, name, canonical_dumps(report))
+            saved = name
+        except Exception as exc:
+            if is_host_refusal(exc):
+                reason = "FL refused the file write: %s" % type(exc).__name__
+                report["report_save_refused"] = True
+                if "bridge_file_access" in report:
+                    # The mailbox writes in this same folder, so a refused save settles the verdict.
+                    report["bridge_file_access"] = "blocked"
+            else:
+                reason = "%s: %s" % (type(exc).__name__, str(exc)[:120])
+    if not saved:
+        report["report_saved"] = False
+        report["report_save_error"] = reason
+    text = canonical_dumps(report)  # final copy for printing, with the outcome recorded
+    try:
+        # base64 survives copying from the output window even if lines are trimmed or re-wrapped.
+        import base64
+
+        data = text.encode("utf-8")
+        encoded = base64.b64encode(data).decode("ascii")
+        print("%s %s %d" % (REPORT_BEGIN, stem, len(data)))
+        for start in range(0, len(encoded), REPORT_LINE_CHARS):
+            print(encoded[start:start + REPORT_LINE_CHARS])
+        print("%s %s" % (REPORT_END, hashlib.sha256(data).hexdigest()))
+    except Exception:
+        pass
+    return saved, reason
+
+
+def slacker_report_location(saved, reason):
+    if saved:
+        return "Report saved: " + saved
+    return (
+        "The report was NOT saved (%s). It was printed to FL's Script output window instead (VIEW > Script "
+        "output): copy everything from the %s line to the %s line into a text file and run "
+        "`flslacker import-report <file>`."
+        % (reason, REPORT_BEGIN, REPORT_END)
+    )

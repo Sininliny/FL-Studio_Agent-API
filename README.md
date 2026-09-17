@@ -7,10 +7,12 @@ a browser UI, a local Ollama model and external MCP agents all share. The workfl
 **capture → analyze → preview → apply → verify**. Nothing is reported as changed until a fresh
 capture from FL matches the predicted result.
 
-> **Status (0.1.0):** everything below runs and is tested against a simulated Piano Roll and FL
-> Studio's own embedded Python interpreter. It has **not yet been run inside FL Studio** (the M0
-> host checklist). Until you record M0 for your FL build, the companion reports note writes as
-> `unavailable`. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
+> **Status (0.1.3):** everything below runs and is tested against a simulated Piano Roll and FL
+> Studio's own embedded Python interpreter. **Inside FL Studio 26.1.6.5639 the file bridge does
+> not work:** FL refuses file access to Piano Roll scripts in the FL Slacker folder, so capture and
+> apply are unsupported on that build (the scripts say so and change nothing). On other builds the
+> note writes stay `unavailable` until you record M0. See
+> [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
 
 ## How it works
 
@@ -82,6 +84,7 @@ Full instructions: [docs/INSTALL.md](docs/INSTALL.md).
 | `flslacker doctor` | Environment, FL install, adapters, bridge self-test, compatibility evidence |
 | `flslacker install-adapters` / `uninstall-adapters` | Add/remove only FL Slacker's own FL-side files |
 | `flslacker m0` | Guided host checklist; records verified capabilities for your FL build |
+| `flslacker import-report` | Import a Slacker Probe report that FL printed instead of saving |
 | `flslacker mcp` | MCP stdio server for external agents (`{"command": "flslacker", "args": ["mcp"]}`) |
 | `flslacker agent "…"` | Ask the local Ollama agent |
 | `flslacker build-fl-scripts` / `export-schemas` | Regenerate `fl_scripts/` and `schemas/` |

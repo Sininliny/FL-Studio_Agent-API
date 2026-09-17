@@ -147,6 +147,9 @@ class Wizard:
         caps = self.api.tool("fls_get_capabilities", {})["data"]
         by_name = {c["name"]: c for c in caps["capabilities"]}
         if not by_name["notes.patch.update"]["supported"]:
+            bridge = by_name["bridge.mailbox"]
+            if not bridge["supported"] and (bridge.get("reason") or "").startswith("Unsupported"):
+                raise SystemExit(f"M0 cannot run on this FL build. {bridge['reason']}")
             raise SystemExit("Restart the companion with `flslacker serve --allow-unverified-host` for M0.")
         self.session_id = caps["active_session"]["session_id"]
         self.op.say("FL Slacker M0 checklist. Use a NEW, disposable FL project; nothing here touches other projects.")
@@ -170,7 +173,9 @@ class Wizard:
         self.ev.facts["prepared"] = {"total": total, "selected": selected}
 
         # Probe: what does FL expose?
-        self.op.instruct("probe", "Run Piano Roll > Tools > Scripting > Slacker > Slacker Probe and press OK.")
+        self.op.instruct("probe", "Run Piano Roll > Tools > Scripting > Slacker > Slacker Probe and press OK. If its "
+                         "message says the report was not saved, import the printed block with "
+                         "`flslacker import-report` in another terminal before continuing.")
         reports = [p for p in sorted(self.settings.probe_dir.glob("probe-*.json"), key=lambda p: p.stat().st_mtime)
                    if p.stat().st_mtime >= started - 1]
         if reports:

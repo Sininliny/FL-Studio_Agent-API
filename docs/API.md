@@ -202,3 +202,19 @@ operations per patch; larger work is refused, not truncated.
 `rejected`, `partial_apply`, `verification_mismatch`), `error`, `applied_operations`,
 `before_state_hash`, `after_state_hash`, `after_content_hash`, `after_note_count`,
 `mismatches`, `host`.
+
+Before opening a dialog, the FL scripts list `requests/` and create, rename and remove a scratch
+file in the session folder. If FL refuses any mailbox file operation (a `SystemError` or
+`RuntimeError` from its script sandbox, as on FL 26.1.6.5639), the script stops with
+`UNSUPPORTED_CAPABILITY (bridge.mailbox)` and writes nothing. Ordinary I/O errors are reported
+as they are.
+
+Probe reports that FL refuses to save are printed to its Script output instead:
+
+```text
+FLSLACKER-REPORT-BEGIN <probe|m0> <byte length>
+<base64 of the canonical JSON report, 160 characters per line>
+FLSLACKER-REPORT-END <sha256 hex of the decoded bytes>
+```
+
+`flslacker import-report` checks the length and checksum and stores the report in `probe/`.

@@ -16,6 +16,7 @@ from typing import Any
 import httpx
 
 from flslacker import __version__, fl_build, hostinfo, installer
+from flslacker import reports as probe_reports
 from flslacker.config import Settings, default_fl_user_dir, is_synchronized_path, load_agent_credentials
 from flslacker.service import capabilities as capmod
 
@@ -57,7 +58,8 @@ def summarize_probe(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     fl = (data.get("host") or {}).get("fl") or {}
     summary = {"file": path.name, "kind": data.get("kind"), "captured_at": data.get("captured_at"),
-               "fl_version": fl.get("version"), "python": (data.get("host") or {}).get("python")}
+               "fl_version": fl.get("version"), "fl_version_error": fl.get("error"),
+               "python": (data.get("host") or {}).get("python")}
     if data.get("kind") == "piano_roll_probe":
         summary.update({
             "noteCount": data.get("noteCount"),
@@ -70,6 +72,11 @@ def summarize_probe(path: Path) -> dict[str, Any]:
             "first_note_extras": data.get("first_note_extras"),
             "getNote_same_object": data.get("getNote_same_object"),
             "timeline_selection": data.get("timeline_selection"),
+            "bridge_file_access": probe_reports.bridge_verdict(data),
+            "report_saved": data.get("report_saved"),
+            "report_save_error": data.get("report_save_error"),
+            "report_save_refused": probe_reports.save_refused(data),
+            "file_access": data.get("file_access"),
         })
     else:
         summary.update({k: data.get(k) for k in (
@@ -154,14 +161,35 @@ def run(settings: Settings, fl_user_dir: Path | None = None, self_test: bool = T
 
     reports = sorted(settings.probe_dir.glob("*.json"), key=lambda p: p.stat().st_mtime) if settings.probe_dir.is_dir() else []
     if not reports:
-        add("fl.probe", "warn", "No probe report yet. In FL run Piano Roll > Tools > Scripting > Slacker > Slacker Probe.")
+        add("fl.probe", "warn", "No probe report yet. In FL run Piano Roll > Tools > Scripting > Slacker > Slacker Probe; "
+            "if FL cannot save the report, import the printed block with `flslacker import-report`.")
+    access = None
     for path in reports[-2:]:
         try:
             summary = summarize_probe(path)
-            add("fl.probe", "info", f"{summary['kind']} from FL {summary['fl_version']} at {summary['captured_at']}",
-                summary)
+            add("fl.probe", "info", f"{summary['kind']} from FL {summary['fl_version'] or 'version unknown'} "
+                f"at {summary['captured_at']}", summary)
+            if summary.get("bridge_file_access"):
+                access = (path.name, summary)
         except (ValueError, OSError) as exc:
             add("fl.probe", "warn", f"{path.name}: unreadable ({exc})")
+    if access:
+        name, summary = access
+        verdict = summary["bridge_file_access"]
+        saved = summary.get("report_saved")
+        where = "; ".join(
+            f"{place}: " + (", ".join(f"{op} {result[op]}" for op in ("list", "read") if op in result)
+                            if isinstance(result, dict) and result.get("exists") else "folder not found")
+            for place, result in (summary.get("file_access") or {}).items() if isinstance(result, dict))
+        if verdict == "blocked":
+            refused = "FL refused the report save" if summary.get("report_save_refused") else "FL refused file reads"
+            status, note = "fail", f"the file bridge cannot work on this build ({refused})"
+        elif verdict == "reads_ok" and saved:
+            status, note = "ok", "reads and one write succeeded"
+        else:
+            status, note = "warn", "inconclusive"
+        add("fl.bridge_access", status,
+            f"{name}: {note} (verdict {verdict}, report_saved={saved}; {where})", summary.get("file_access"))
 
     records = capmod.load_records(home)
     record = capmod.find_record(records, detected_build)
@@ -170,10 +198,14 @@ def run(settings: Settings, fl_user_dir: Path | None = None, self_test: bool = T
     else:
         statuses = record.data.get("capabilities", {})
         verified = [k for k, v in statuses.items() if v.get("status") == "verified"]
-        add("compatibility", "ok" if len(verified) == len(statuses) else "warn",
-            f"{record.source}:{record.record_id}: verified {len(verified)}/{len(statuses)} capabilities"
-            + ("" if verified else " (run the M0 checklist; writes stay disabled unless --allow-unverified-host)"),
-            {k: v.get("status") for k, v in statuses.items()})
+        unsupported = [k for k, v in statuses.items() if v.get("status") == "unsupported"]
+        detail = f"{record.source}:{record.record_id}: verified {len(verified)}/{len(statuses)} capabilities"
+        if unsupported:
+            detail += f"; unsupported on this build: {', '.join(unsupported)}. {record.note('bridge.mailbox')}"
+        elif not verified:
+            detail += " (run the M0 checklist; writes stay disabled unless --allow-unverified-host)"
+        status = "ok" if len(verified) == len(statuses) else "fail" if "bridge.mailbox" in unsupported else "warn"
+        add("compatibility", status, detail, {k: v.get("status") for k, v in statuses.items()})
 
     if settings.ollama_model:
         from flslacker.contracts.errors import FlsError

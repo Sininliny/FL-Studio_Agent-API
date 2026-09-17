@@ -49,11 +49,7 @@ def slacker_capture_payload(scope, label):
 
 
 def slacker_capture_main():
-    try:
-        context = SlackerContext()
-    except BridgeError as exc:
-        slacker_show("Slacker Capture\n\n" + str(exc))
-        return
+    context = SlackerContext()
     pending = context.pending(("capture_request",))
 
     labels = ["(choose what to capture)"]
@@ -145,4 +141,4 @@ def slacker_capture_main():
 
 
 if not globals().get("_SLACKER_NO_AUTORUN"):
-    slacker_capture_main()
+    slacker_run("Slacker Capture", slacker_capture_main, "The score was not changed.")

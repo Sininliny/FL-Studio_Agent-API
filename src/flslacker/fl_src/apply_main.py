@@ -115,11 +115,7 @@ def slacker_execute_apply(job):
 
 
 def slacker_apply_main():
-    try:
-        context = SlackerContext()
-    except BridgeError as exc:
-        slacker_show("Slacker Apply\n\n" + str(exc))
-        return
+    context = SlackerContext()
     pending = context.pending(("apply_request",))
     if not pending:
         slacker_show("Slacker Apply\n\nThere are no pending apply jobs. Nothing was changed.")
@@ -199,4 +195,8 @@ def slacker_apply_main():
 
 
 if not globals().get("_SLACKER_NO_AUTORUN"):
-    slacker_apply_main()
+    slacker_run(
+        "Slacker Apply",
+        slacker_apply_main,
+        "If notes may have changed, check the Piano Roll, then run Slacker Capture so the companion can reconcile.",
+    )
