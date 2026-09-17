@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FL Slacker</title>
+  <link rel="stylesheet" href="/ui/app.css">
+  <script src="/ui/app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">FL&nbsp;Slacker</div>
+    <div id="connection" class="connection" aria-live="polite"></div>
+    <nav class="top-actions">
+      <button id="new-session" class="ghost" type="button" hidden>New session</button>
+      <button id="logout" class="ghost" type="button" hidden>Sign out</button>
+    </nav>
+  </header>
+
+  <main id="login" class="login" hidden>
+    <form id="login-form" class="card narrow">
+      <h1>Sign in</h1>
+      <p>Run <code>flslacker ui</code> in a terminal and type the one-time code it prints.</p>
+      <label for="login-code">Login code</label>
+      <input id="login-code" autocomplete="one-time-code" placeholder="ABCD-EFGH" maxlength="9" required>
+      <button type="submit">Sign in</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </main>
+
+  <main id="app" class="layout" hidden>
+    <section class="column">
+      <div id="fl-actions"></div>
+
+      <article class="card">
+        <h2>Capture</h2>
+        <p class="hint">Asks FL for the notes the Piano Roll exposes. Choose the scope explicitly; an empty
+          selection is never widened.</p>
+        <form id="capture-form" class="stack">
+          <fieldset class="choice">
+            <legend>Scope</legend>
+            <label><input type="radio" name="scope" value="selected" required> Selected notes</label>
+            <label><input type="radio" name="scope" value="all_exposed" required> All notes visible to scripts</label>
+          </fieldset>
+          <label for="capture-label">Target label (optional hint shown in FL)</label>
+          <input id="capture-label" maxlength="120" placeholder="Pattern 2 / Piano">
+          <button type="submit">Request capture</button>
+        </form>
+      </article>
+
+      <article class="card">
+        <h2>One-click recipes</h2>
+        <div id="recipes"></div>
+      </article>
+
+      <article class="card">
+        <h2>Snapshots</h2>
+        <div id="snapshots" class="list"></div>
+      </article>
+
+      <article class="card">
+        <h2>Jobs</h2>
+        <div id="jobs" class="list"></div>
+      </article>
+    </section>
+
+    <section class="column wide">
+      <article id="detail" class="card detail">
+        <p class="hint">Select a snapshot or plan to inspect it.</p>
+      </article>
+
+      <article class="card">
+        <h2>Plans</h2>
+        <div id="plans" class="list"></div>
+      </article>
+
+      <article class="card">
+        <h2>Receipts</h2>
+        <div id="receipts" class="list"></div>
+      </article>
+
+      <article class="card">
+        <h2>Write grants</h2>
+        <p class="hint">Agents can only apply plans covered by a grant you issue here. Grants expire.</p>
+        <div id="grants" class="list"></div>
+        <details>
+          <summary>Issue a bounded grant</summary>
+          <form id="grant-form" class="grid-form">
+            <label>Scope
+              <select name="scope"><option value="selected">selected</option><option value="all_exposed">all_exposed</option></select>
+            </label>
+            <label>Target label (blank = any)<input name="target_label" maxlength="120"></label>
+            <label>Max notes<input name="max_notes" type="number" min="1" max="1000" value="16"></label>
+            <label>Max pitch change<input name="max_pitch_delta" type="number" min="0" max="127" value="2"></label>
+            <label>Lifetime (minutes)<input name="lifetime_minutes" type="number" min="1" max="1440" value="10"></label>
+            <fieldset class="choice">
+              <legend>Operations</legend>
+              <label><input type="checkbox" name="op" value="note.update" checked> update</label>
+              <label><input type="checkbox" name="op" value="note.insert"> insert</label>
+              <label><input type="checkbox" name="op" value="note.delete"> delete</label>
+            </fieldset>
+            <fieldset class="choice">
+              <legend>Fields</legend>
+              <label><input type="checkbox" name="field" value="pitch" checked> pitch</label>
+              <label><input type="checkbox" name="field" value="velocity"> velocity</label>
+              <label><input type="checkbox" name="field" value="start_tick"> start</label>
+              <label><input type="checkbox" name="field" value="duration_tick"> length</label>
+            </fieldset>
+            <button type="submit">Issue grant</button>
+          </form>
+        </details>
+      </article>
+
+      <article id="agent-card" class="card" hidden>
+        <h2>Local agent (Ollama)</h2>
+        <form id="agent-form" class="stack">
+          <label for="agent-prompt">Request</label>
+          <textarea id="agent-prompt" rows="3" maxlength="4000"
+            placeholder="Capture my selected notes and suggest fixes for notes that break the repeated motif."></textarea>
+          <button type="submit">Ask agent</button>
+        </form>
+        <div id="agent-output" class="agent-output"></div>
+      </article>
+
+      <article class="card">
+        <details>
+          <summary>Capabilities</summary>
+          <div id="capabilities"></div>
+        </details>
+      </article>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

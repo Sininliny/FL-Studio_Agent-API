@@ -1,0 +1,976 @@
+{
+  "$defs": {
+    "DeleteOp": {
+      "additionalProperties": false,
+      "properties": {
+        "note_id": {
+          "description": "Snapshot-local note id",
+          "pattern": "^n[0-9]{1,5}$",
+          "title": "Note Id",
+          "type": "string"
+        },
+        "op": {
+          "const": "note.delete",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "note_id"
+      ],
+      "title": "DeleteOp",
+      "type": "object"
+    },
+    "DiffRow": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "After"
+        },
+        "before": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Before"
+        },
+        "changed_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Changed Fields",
+          "type": "array"
+        },
+        "client_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_.-]{1,40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Client Id"
+        },
+        "kind": {
+          "enum": [
+            "update",
+            "insert",
+            "delete"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note_id": {
+          "anyOf": [
+            {
+              "description": "Snapshot-local note id",
+              "pattern": "^n[0-9]{1,5}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note Id"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "summary"
+      ],
+      "title": "DiffRow",
+      "type": "object"
+    },
+    "GrantCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "covered": {
+          "title": "Covered",
+          "type": "boolean"
+        },
+        "grant_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Grant Id"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "covered",
+        "reason"
+      ],
+      "title": "GrantCoverage",
+      "type": "object"
+    },
+    "InsertOp": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "pattern": "^[A-Za-z0-9_.-]{1,40}$",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "note": {
+          "$ref": "#/$defs/NoteTemplate"
+        },
+        "op": {
+          "const": "note.insert",
+          "title": "Op",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "client_id",
+        "note"
+      ],
+      "title": "InsertOp",
+      "type": "object"
+    },
+    "NoteSet": {
+      "additionalProperties": false,
+      "description": "Allowlisted fields an update may change. Omitted fields are untouched.",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "maximum": 15,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        },
+        "duration_tick": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Tick"
+        },
+        "fcut": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fcut"
+        },
+        "fres": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fres"
+        },
+        "muted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Muted"
+        },
+        "pan": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pan"
+        },
+        "pitch": {
+          "anyOf": [
+            {
+              "maximum": 127,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pitch"
+        },
+        "pitchofs": {
+          "anyOf": [
+            {
+              "maximum": 120,
+              "minimum": -120,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pitchofs"
+        },
+        "porta": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Porta"
+        },
+        "release": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Release"
+        },
+        "repeats": {
+          "anyOf": [
+            {
+              "maximum": 14,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repeats"
+        },
+        "slide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slide"
+        },
+        "start_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Tick"
+        },
+        "velocity": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Velocity"
+        }
+      },
+      "title": "NoteSet",
+      "type": "object"
+    },
+    "NoteTemplate": {
+      "additionalProperties": false,
+      "description": "A new note. Omitted optional fields are filled from the captured default note.",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "maximum": 15,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        },
+        "duration_tick": {
+          "minimum": 1,
+          "title": "Duration Tick",
+          "type": "integer"
+        },
+        "fcut": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fcut"
+        },
+        "fres": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fres"
+        },
+        "group": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Group"
+        },
+        "muted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Muted"
+        },
+        "pan": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pan"
+        },
+        "pitch": {
+          "maximum": 127,
+          "minimum": 0,
+          "title": "Pitch",
+          "type": "integer"
+        },
+        "pitchofs": {
+          "anyOf": [
+            {
+              "maximum": 120,
+              "minimum": -120,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pitchofs"
+        },
+        "porta": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Porta"
+        },
+        "release": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Release"
+        },
+        "repeats": {
+          "anyOf": [
+            {
+              "maximum": 14,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repeats"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        },
+        "slide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slide"
+        },
+        "start_tick": {
+          "minimum": 0,
+          "title": "Start Tick",
+          "type": "integer"
+        },
+        "velocity": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "ge": 0,
+              "le": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Velocity"
+        }
+      },
+      "required": [
+        "pitch",
+        "start_tick",
+        "duration_tick"
+      ],
+      "title": "NoteTemplate",
+      "type": "object"
+    },
+    "Plan": {
+      "additionalProperties": false,
+      "properties": {
+        "base_note_count": {
+          "title": "Base Note Count",
+          "type": "integer"
+        },
+        "base_state_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Base State Hash",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        },
+        "diff": {
+          "items": {
+            "$ref": "#/$defs/DiffRow"
+          },
+          "title": "Diff",
+          "type": "array"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "kind": {
+          "default": "edit",
+          "enum": [
+            "edit",
+            "restore"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "limits": {
+          "$ref": "#/$defs/PlanLimits"
+        },
+        "operations": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "note.delete": "#/$defs/DeleteOp",
+                "note.insert": "#/$defs/InsertOp",
+                "note.update": "#/$defs/UpdateOp"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/UpdateOp"
+              },
+              {
+                "$ref": "#/$defs/InsertOp"
+              },
+              {
+                "$ref": "#/$defs/DeleteOp"
+              }
+            ]
+          },
+          "title": "Operations",
+          "type": "array"
+        },
+        "plan_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Plan Hash",
+          "type": "string"
+        },
+        "plan_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "ppq": {
+          "title": "Ppq",
+          "type": "integer"
+        },
+        "predicted_content_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Predicted Content Hash",
+          "type": "string"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "resolved_operations": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Resolved Operations",
+          "type": "array"
+        },
+        "restores_receipt_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Restores Receipt Id"
+        },
+        "scope": {
+          "enum": [
+            "selected",
+            "all_exposed"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "session_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "target_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "target_label": {
+          "title": "Target Label",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "plan_id",
+        "session_id",
+        "target_id",
+        "target_label",
+        "snapshot_id",
+        "scope",
+        "ppq",
+        "base_state_hash",
+        "base_note_count",
+        "operations",
+        "resolved_operations",
+        "diff",
+        "limits",
+        "predicted_content_hash",
+        "rationale",
+        "created_by",
+        "created_at",
+        "expires_at",
+        "plan_hash"
+      ],
+      "title": "Plan",
+      "type": "object"
+    },
+    "PlanLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "affected_notes": {
+          "title": "Affected Notes",
+          "type": "integer"
+        },
+        "delete_count": {
+          "title": "Delete Count",
+          "type": "integer"
+        },
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "insert_count": {
+          "title": "Insert Count",
+          "type": "integer"
+        },
+        "max_operations": {
+          "title": "Max Operations",
+          "type": "integer"
+        },
+        "max_pitch_delta": {
+          "title": "Max Pitch Delta",
+          "type": "integer"
+        },
+        "max_time_delta_ticks": {
+          "title": "Max Time Delta Ticks",
+          "type": "integer"
+        },
+        "max_velocity_delta": {
+          "title": "Max Velocity Delta",
+          "type": "number"
+        },
+        "operation_count": {
+          "title": "Operation Count",
+          "type": "integer"
+        },
+        "update_count": {
+          "title": "Update Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operation_count",
+        "max_operations",
+        "update_count",
+        "insert_count",
+        "delete_count",
+        "affected_notes",
+        "fields",
+        "max_pitch_delta",
+        "max_time_delta_ticks",
+        "max_velocity_delta"
+      ],
+      "title": "PlanLimits",
+      "type": "object"
+    },
+    "UpdateOp": {
+      "additionalProperties": false,
+      "properties": {
+        "note_id": {
+          "description": "Snapshot-local note id",
+          "pattern": "^n[0-9]{1,5}$",
+          "title": "Note Id",
+          "type": "string"
+        },
+        "op": {
+          "const": "note.update",
+          "title": "Op",
+          "type": "string"
+        },
+        "set": {
+          "$ref": "#/$defs/NoteSet"
+        }
+      },
+      "required": [
+        "op",
+        "note_id",
+        "set"
+      ],
+      "title": "UpdateOp",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "expired": {
+      "title": "Expired",
+      "type": "boolean"
+    },
+    "grant_coverage": {
+      "$ref": "#/$defs/GrantCoverage"
+    },
+    "plan": {
+      "$ref": "#/$defs/Plan"
+    },
+    "snapshot_is_latest": {
+      "title": "Snapshot Is Latest",
+      "type": "boolean"
+    },
+    "text_diff": {
+      "title": "Text Diff",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "plan",
+    "text_diff",
+    "warnings",
+    "expired",
+    "snapshot_is_latest",
+    "grant_coverage"
+  ],
+  "title": "PlanPreview",
+  "type": "object"
+}

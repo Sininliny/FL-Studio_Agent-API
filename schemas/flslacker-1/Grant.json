@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "GrantConstraints": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "max_notes": {
+          "default": 16,
+          "description": "Change budget: total notes this grant may touch",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Notes",
+          "type": "integer"
+        },
+        "max_pitch_delta": {
+          "anyOf": [
+            {
+              "maximum": 127,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 2,
+          "title": "Max Pitch Delta"
+        },
+        "max_time_delta_ticks": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Time Delta Ticks"
+        },
+        "max_velocity_delta": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Velocity Delta"
+        },
+        "operation_kinds": {
+          "items": {
+            "enum": [
+              "note.update",
+              "note.insert",
+              "note.delete"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Operation Kinds",
+          "type": "array"
+        },
+        "scope": {
+          "default": "selected",
+          "enum": [
+            "selected",
+            "all_exposed"
+          ],
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "title": "GrantConstraints",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "budget_used": {
+      "default": 0,
+      "title": "Budget Used",
+      "type": "integer"
+    },
+    "constraints": {
+      "$ref": "#/$defs/GrantConstraints"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "grant_id": {
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Grant Id",
+      "type": "string"
+    },
+    "issued_by": {
+      "title": "Issued By",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "plan",
+        "recipe"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "max_uses": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Max Uses"
+    },
+    "plan_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plan Hash"
+    },
+    "revoked": {
+      "default": false,
+      "title": "Revoked",
+      "type": "boolean"
+    },
+    "session_id": {
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "target_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "None: any user-attested target in the session",
+      "title": "Target Label"
+    },
+    "uses": {
+      "default": 0,
+      "title": "Uses",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "grant_id",
+    "kind",
+    "session_id",
+    "constraints",
+    "issued_by",
+    "created_at",
+    "expires_at"
+  ],
+  "title": "Grant",
+  "type": "object"
+}

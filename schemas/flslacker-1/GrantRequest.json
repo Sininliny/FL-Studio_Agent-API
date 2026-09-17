@@ -1,0 +1,138 @@
+{
+  "$defs": {
+    "GrantConstraints": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "max_notes": {
+          "default": 16,
+          "description": "Change budget: total notes this grant may touch",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Notes",
+          "type": "integer"
+        },
+        "max_pitch_delta": {
+          "anyOf": [
+            {
+              "maximum": 127,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 2,
+          "title": "Max Pitch Delta"
+        },
+        "max_time_delta_ticks": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Time Delta Ticks"
+        },
+        "max_velocity_delta": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Velocity Delta"
+        },
+        "operation_kinds": {
+          "items": {
+            "enum": [
+              "note.update",
+              "note.insert",
+              "note.delete"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Operation Kinds",
+          "type": "array"
+        },
+        "scope": {
+          "default": "selected",
+          "enum": [
+            "selected",
+            "all_exposed"
+          ],
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "title": "GrantConstraints",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "constraints": {
+      "$ref": "#/$defs/GrantConstraints"
+    },
+    "lifetime_minutes": {
+      "default": 10,
+      "maximum": 1440,
+      "minimum": 1,
+      "title": "Lifetime Minutes",
+      "type": "integer"
+    },
+    "max_uses": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Max Uses"
+    },
+    "session_id": {
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "target_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Label"
+    }
+  },
+  "required": [
+    "session_id"
+  ],
+  "title": "GrantRequest",
+  "type": "object"
+}

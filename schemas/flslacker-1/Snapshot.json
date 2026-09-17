@@ -1,0 +1,583 @@
+{
+  "$defs": {
+    "Freshness": {
+      "additionalProperties": false,
+      "properties": {
+        "age_seconds": {
+          "title": "Age Seconds",
+          "type": "integer"
+        },
+        "cached": {
+          "const": true,
+          "default": true,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "is_latest_for_target": {
+          "title": "Is Latest For Target",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "Cached capture; the live score may have changed since.",
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "age_seconds",
+        "is_latest_for_target"
+      ],
+      "title": "Freshness",
+      "type": "object"
+    },
+    "Marker": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "ordinal": {
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time"
+        },
+        "tsden": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tsden"
+        },
+        "tsnum": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tsnum"
+        }
+      },
+      "required": [
+        "ordinal"
+      ],
+      "title": "Marker",
+      "type": "object"
+    },
+    "Note": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_tick": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duration Tick"
+        },
+        "fingerprint": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "fl": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "All other readable FL properties in native units",
+          "title": "Fl",
+          "type": "object"
+        },
+        "in_scope": {
+          "title": "In Scope",
+          "type": "boolean"
+        },
+        "note_id": {
+          "description": "Snapshot-local note id",
+          "pattern": "^n[0-9]{1,5}$",
+          "title": "Note Id",
+          "type": "string"
+        },
+        "ordinal": {
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "pitch": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pitch"
+        },
+        "start_tick": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Start Tick"
+        },
+        "velocity": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Velocity"
+        }
+      },
+      "required": [
+        "note_id",
+        "ordinal",
+        "pitch",
+        "start_tick",
+        "duration_tick",
+        "velocity",
+        "fl",
+        "in_scope",
+        "fingerprint"
+      ],
+      "title": "Note",
+      "type": "object"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "exposed_count": {
+          "title": "Exposed Count",
+          "type": "integer"
+        },
+        "selected_count": {
+          "title": "Selected Count",
+          "type": "integer"
+        },
+        "selected_note_ids": {
+          "items": {
+            "description": "Snapshot-local note id",
+            "pattern": "^n[0-9]{1,5}$",
+            "type": "string"
+          },
+          "title": "Selected Note Ids",
+          "type": "array"
+        },
+        "timeline": {
+          "anyOf": [
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeline"
+        }
+      },
+      "required": [
+        "selected_count",
+        "exposed_count",
+        "selected_note_ids"
+      ],
+      "title": "Selection",
+      "type": "object"
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "binding": {
+          "enum": [
+            "verified",
+            "user_attested"
+          ],
+          "title": "Binding",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "observed": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Observed",
+          "type": "object"
+        },
+        "session_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "target_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Target Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_id",
+        "session_id",
+        "binding",
+        "label"
+      ],
+      "title": "Target",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "captured_at": {
+      "format": "date-time",
+      "title": "Captured At",
+      "type": "string"
+    },
+    "content_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Content Hash",
+      "type": "string"
+    },
+    "coverage": {
+      "const": "exposed_score",
+      "default": "exposed_score",
+      "title": "Coverage",
+      "type": "string"
+    },
+    "default_note": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Default Note"
+    },
+    "extra_note_attributes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Extra Note Attributes",
+      "type": "array"
+    },
+    "freshness": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Freshness"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "host": {
+      "additionalProperties": true,
+      "title": "Host",
+      "type": "object"
+    },
+    "in_scope_count": {
+      "title": "In Scope Count",
+      "type": "integer"
+    },
+    "job_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Job Id"
+    },
+    "markers": {
+      "items": {
+        "$ref": "#/$defs/Marker"
+      },
+      "title": "Markers",
+      "type": "array"
+    },
+    "notes": {
+      "items": {
+        "$ref": "#/$defs/Note"
+      },
+      "title": "Notes",
+      "type": "array"
+    },
+    "ppq": {
+      "title": "Ppq",
+      "type": "integer"
+    },
+    "purpose": {
+      "enum": [
+        "capture",
+        "verify",
+        "adhoc"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "received_at": {
+      "format": "date-time",
+      "title": "Received At",
+      "type": "string"
+    },
+    "scope": {
+      "enum": [
+        "selected",
+        "all_exposed"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "selection": {
+      "$ref": "#/$defs/Selection"
+    },
+    "session_id": {
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "state_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "State Hash",
+      "type": "string"
+    },
+    "supported_fields": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Supported Fields",
+      "type": "array"
+    },
+    "target": {
+      "$ref": "#/$defs/Target"
+    },
+    "time_signature": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Time Signature"
+    },
+    "unsupported_fields": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Unsupported Fields",
+      "type": "object"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "session_id",
+    "target",
+    "purpose",
+    "captured_at",
+    "received_at",
+    "scope",
+    "ppq",
+    "notes",
+    "markers",
+    "selection",
+    "in_scope_count",
+    "supported_fields",
+    "state_hash",
+    "content_hash"
+  ],
+  "title": "Snapshot",
+  "type": "object"
+}

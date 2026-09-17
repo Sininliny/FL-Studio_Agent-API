@@ -1,0 +1,4711 @@
+{
+  "components": {
+    "schemas": {
+      "Analysis": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "analyses": {
+            "items": {
+              "enum": [
+                "motifs",
+                "key",
+                "chords",
+                "pitch_outliers"
+              ],
+              "type": "string"
+            },
+            "title": "Analyses",
+            "type": "array"
+          },
+          "analysis_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Analysis Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/AnalysisParameters"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_id",
+          "snapshot_id",
+          "algorithm",
+          "version",
+          "analyses",
+          "parameters",
+          "findings",
+          "summary",
+          "created_at"
+        ],
+        "title": "Analysis",
+        "type": "object"
+      },
+      "AnalysisParameters": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_overlap": {
+            "default": false,
+            "title": "Allow Overlap",
+            "type": "boolean"
+          },
+          "chord_window_beats": {
+            "default": 4,
+            "maximum": 16,
+            "minimum": 1,
+            "title": "Chord Window Beats",
+            "type": "integer"
+          },
+          "exclude_note_ids": {
+            "items": {
+              "description": "Snapshot-local note id",
+              "pattern": "^n[0-9]{1,5}$",
+              "type": "string"
+            },
+            "title": "Exclude Note Ids",
+            "type": "array"
+          },
+          "in_scope_only": {
+            "default": true,
+            "title": "In Scope Only",
+            "type": "boolean"
+          },
+          "key_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "User-specified key such as 'C major'; treated as a constraint",
+            "title": "Key Hint"
+          },
+          "max_findings": {
+            "default": 50,
+            "maximum": 500,
+            "minimum": 1,
+            "title": "Max Findings",
+            "type": "integer"
+          },
+          "max_motif_notes": {
+            "default": 12,
+            "maximum": 64,
+            "minimum": 3,
+            "title": "Max Motif Notes",
+            "type": "integer"
+          },
+          "min_motif_notes": {
+            "default": 4,
+            "maximum": 32,
+            "minimum": 3,
+            "title": "Min Motif Notes",
+            "type": "integer"
+          },
+          "min_occurrences": {
+            "default": 2,
+            "maximum": 100,
+            "minimum": 2,
+            "title": "Min Occurrences",
+            "type": "integer"
+          },
+          "onset_tolerance_ticks": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Default: PPQ/8",
+            "title": "Onset Tolerance Ticks"
+          },
+          "pitch_range": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pitch Range"
+          },
+          "transpose_invariant": {
+            "default": true,
+            "title": "Transpose Invariant",
+            "type": "boolean"
+          },
+          "voice": {
+            "default": "skyline",
+            "enum": [
+              "skyline",
+              "all"
+            ],
+            "title": "Voice",
+            "type": "string"
+          }
+        },
+        "title": "AnalysisParameters",
+        "type": "object"
+      },
+      "AnalyzeScoreArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "analyses": {
+            "items": {
+              "enum": [
+                "motifs",
+                "key",
+                "chords",
+                "pitch_outliers"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Analyses",
+            "type": "array"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/AnalysisParameters"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "analyses"
+        ],
+        "title": "AnalyzeScoreArgs",
+        "type": "object"
+      },
+      "ApplyPlanArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_plan_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Plan Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "plan_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Plan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id",
+          "expected_plan_hash",
+          "idempotency_key"
+        ],
+        "title": "ApplyPlanArgs",
+        "type": "object"
+      },
+      "CapabilitiesView": {
+        "additionalProperties": false,
+        "properties": {
+          "active_session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bridge": {
+            "additionalProperties": true,
+            "title": "Bridge",
+            "type": "object"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/Capability"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "companion_version": {
+            "title": "Companion Version",
+            "type": "string"
+          },
+          "compatibility_record": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compatibility Record"
+          },
+          "fl_build": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fl Build"
+          },
+          "protocol": {
+            "title": "Protocol",
+            "type": "string"
+          }
+        },
+        "required": [
+          "protocol",
+          "companion_version",
+          "fl_build",
+          "compatibility_record",
+          "active_session",
+          "capabilities",
+          "bridge"
+        ],
+        "title": "CapabilitiesView",
+        "type": "object"
+      },
+      "Capability": {
+        "additionalProperties": false,
+        "properties": {
+          "execution": {
+            "title": "Execution",
+            "type": "string"
+          },
+          "identity": {
+            "title": "Identity",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "supported",
+              "unavailable",
+              "not_connected",
+              "requires_user_action"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "supported": {
+            "title": "Supported",
+            "type": "boolean"
+          },
+          "verified_build": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verified Build"
+          }
+        },
+        "required": [
+          "name",
+          "supported",
+          "status",
+          "execution",
+          "scope",
+          "identity"
+        ],
+        "title": "Capability",
+        "type": "object"
+      },
+      "CaptureScoreArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "enum": [
+              "selected",
+              "all_exposed"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "target_label": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional hint shown in FL",
+            "title": "Target Label"
+          }
+        },
+        "required": [
+          "session_id",
+          "scope"
+        ],
+        "title": "CaptureScoreArgs",
+        "type": "object"
+      },
+      "DeleteOp": {
+        "additionalProperties": false,
+        "properties": {
+          "note_id": {
+            "description": "Snapshot-local note id",
+            "pattern": "^n[0-9]{1,5}$",
+            "title": "Note Id",
+            "type": "string"
+          },
+          "op": {
+            "const": "note.delete",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "note_id"
+        ],
+        "title": "DeleteOp",
+        "type": "object"
+      },
+      "DiffRow": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "After"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Before"
+          },
+          "changed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Changed Fields",
+            "type": "array"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9_.-]{1,40}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Client Id"
+          },
+          "kind": {
+            "enum": [
+              "update",
+              "insert",
+              "delete"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "note_id": {
+            "anyOf": [
+              {
+                "description": "Snapshot-local note id",
+                "pattern": "^n[0-9]{1,5}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note Id"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "summary"
+        ],
+        "title": "DiffRow",
+        "type": "object"
+      },
+      "ErrorEnvelope": {
+        "$ref": "#/components/schemas/ToolResult_NoArgs_"
+      },
+      "ErrorInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "required_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequiredAction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "retryable"
+        ],
+        "title": "ErrorInfo",
+        "type": "object"
+      },
+      "Finding": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "note_ids": {
+            "items": {
+              "description": "Snapshot-local note id",
+              "pattern": "^n[0-9]{1,5}$",
+              "type": "string"
+            },
+            "title": "Note Ids",
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "suggestion"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "suggestion": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Suggestion"
+          }
+        },
+        "required": [
+          "finding_id",
+          "kind",
+          "severity",
+          "message",
+          "confidence"
+        ],
+        "title": "Finding",
+        "type": "object"
+      },
+      "Freshness": {
+        "additionalProperties": false,
+        "properties": {
+          "age_seconds": {
+            "title": "Age Seconds",
+            "type": "integer"
+          },
+          "cached": {
+            "const": true,
+            "default": true,
+            "title": "Cached",
+            "type": "boolean"
+          },
+          "is_latest_for_target": {
+            "title": "Is Latest For Target",
+            "type": "boolean"
+          },
+          "note": {
+            "default": "Cached capture; the live score may have changed since.",
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "age_seconds",
+          "is_latest_for_target"
+        ],
+        "title": "Freshness",
+        "type": "object"
+      },
+      "GetSnapshotArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "include_notes": {
+            "default": true,
+            "title": "Include Notes",
+            "type": "boolean"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "snapshot_id"
+        ],
+        "title": "GetSnapshotArgs",
+        "type": "object"
+      },
+      "GrantCoverage": {
+        "additionalProperties": false,
+        "properties": {
+          "covered": {
+            "title": "Covered",
+            "type": "boolean"
+          },
+          "grant_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Grant Id"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "covered",
+          "reason"
+        ],
+        "title": "GrantCoverage",
+        "type": "object"
+      },
+      "InsertOp": {
+        "additionalProperties": false,
+        "properties": {
+          "client_id": {
+            "pattern": "^[A-Za-z0-9_.-]{1,40}$",
+            "title": "Client Id",
+            "type": "string"
+          },
+          "note": {
+            "$ref": "#/components/schemas/NoteTemplate"
+          },
+          "op": {
+            "const": "note.insert",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "client_id",
+          "note"
+        ],
+        "title": "InsertOp",
+        "type": "object"
+      },
+      "Job": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/JobEvent"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "job_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "capture",
+              "apply"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "next_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequiredAction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "parent_job_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Job Id"
+          },
+          "plan_hash": {
+            "anyOf": [
+              {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Plan Hash"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Plan Id"
+          },
+          "purpose": {
+            "enum": [
+              "capture",
+              "verify",
+              "apply",
+              "restore"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "receipt_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Receipt Id"
+          },
+          "request_short_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Short Id"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "enum": [
+                  "selected",
+                  "all_exposed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scope"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Snapshot Id"
+          },
+          "state": {
+            "enum": [
+              "queued",
+              "awaiting_fl_action",
+              "validating",
+              "applying",
+              "awaiting_verification",
+              "applied",
+              "completed",
+              "cancelled",
+              "expired",
+              "failed",
+              "outcome_unknown",
+              "partial_apply",
+              "verification_failed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "target_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Target Label"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "verify_job_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verify Job Id"
+          }
+        },
+        "required": [
+          "job_id",
+          "kind",
+          "purpose",
+          "state",
+          "session_id",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "expires_at"
+        ],
+        "title": "Job",
+        "type": "object"
+      },
+      "JobArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "job_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Job Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "title": "JobArgs",
+        "type": "object"
+      },
+      "JobEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "note": {
+            "default": "",
+            "title": "Note",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "at"
+        ],
+        "title": "JobEvent",
+        "type": "object"
+      },
+      "JobView": {
+        "additionalProperties": false,
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Receipt"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "job"
+        ],
+        "title": "JobView",
+        "type": "object"
+      },
+      "Marker": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mode"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "time": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Time"
+          },
+          "tsden": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tsden"
+          },
+          "tsnum": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tsnum"
+          }
+        },
+        "required": [
+          "ordinal"
+        ],
+        "title": "Marker",
+        "type": "object"
+      },
+      "NoArgs": {
+        "additionalProperties": false,
+        "properties": {},
+        "title": "NoArgs",
+        "type": "object"
+      },
+      "Note": {
+        "additionalProperties": false,
+        "properties": {
+          "duration_tick": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Tick"
+          },
+          "fingerprint": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Fingerprint",
+            "type": "string"
+          },
+          "fl": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "All other readable FL properties in native units",
+            "title": "Fl",
+            "type": "object"
+          },
+          "in_scope": {
+            "title": "In Scope",
+            "type": "boolean"
+          },
+          "note_id": {
+            "description": "Snapshot-local note id",
+            "pattern": "^n[0-9]{1,5}$",
+            "title": "Note Id",
+            "type": "string"
+          },
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "pitch": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pitch"
+          },
+          "start_tick": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Tick"
+          },
+          "velocity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Velocity"
+          }
+        },
+        "required": [
+          "note_id",
+          "ordinal",
+          "pitch",
+          "start_tick",
+          "duration_tick",
+          "velocity",
+          "fl",
+          "in_scope",
+          "fingerprint"
+        ],
+        "title": "Note",
+        "type": "object"
+      },
+      "NoteSet": {
+        "additionalProperties": false,
+        "description": "Allowlisted fields an update may change. Omitted fields are untouched.",
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "maximum": 15,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Color"
+          },
+          "duration_tick": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Tick"
+          },
+          "fcut": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fcut"
+          },
+          "fres": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fres"
+          },
+          "muted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Muted"
+          },
+          "pan": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pan"
+          },
+          "pitch": {
+            "anyOf": [
+              {
+                "maximum": 127,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pitch"
+          },
+          "pitchofs": {
+            "anyOf": [
+              {
+                "maximum": 120,
+                "minimum": -120,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pitchofs"
+          },
+          "porta": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Porta"
+          },
+          "release": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Release"
+          },
+          "repeats": {
+            "anyOf": [
+              {
+                "maximum": 14,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Repeats"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slide"
+          },
+          "start_tick": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Tick"
+          },
+          "velocity": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Velocity"
+          }
+        },
+        "title": "NoteSet",
+        "type": "object"
+      },
+      "NoteTemplate": {
+        "additionalProperties": false,
+        "description": "A new note. Omitted optional fields are filled from the captured default note.",
+        "properties": {
+          "color": {
+            "anyOf": [
+              {
+                "maximum": 15,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Color"
+          },
+          "duration_tick": {
+            "minimum": 1,
+            "title": "Duration Tick",
+            "type": "integer"
+          },
+          "fcut": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fcut"
+          },
+          "fres": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fres"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Group"
+          },
+          "muted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Muted"
+          },
+          "pan": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pan"
+          },
+          "pitch": {
+            "maximum": 127,
+            "minimum": 0,
+            "title": "Pitch",
+            "type": "integer"
+          },
+          "pitchofs": {
+            "anyOf": [
+              {
+                "maximum": 120,
+                "minimum": -120,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pitchofs"
+          },
+          "porta": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Porta"
+          },
+          "release": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Release"
+          },
+          "repeats": {
+            "anyOf": [
+              {
+                "maximum": 14,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Repeats"
+          },
+          "selected": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Selected"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slide"
+          },
+          "start_tick": {
+            "minimum": 0,
+            "title": "Start Tick",
+            "type": "integer"
+          },
+          "velocity": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "ge": 0,
+                "le": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Velocity"
+          }
+        },
+        "required": [
+          "pitch",
+          "start_tick",
+          "duration_tick"
+        ],
+        "title": "NoteTemplate",
+        "type": "object"
+      },
+      "Plan": {
+        "additionalProperties": false,
+        "properties": {
+          "base_note_count": {
+            "title": "Base Note Count",
+            "type": "integer"
+          },
+          "base_state_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Base State Hash",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "diff": {
+            "items": {
+              "$ref": "#/components/schemas/DiffRow"
+            },
+            "title": "Diff",
+            "type": "array"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "kind": {
+            "default": "edit",
+            "enum": [
+              "edit",
+              "restore"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PlanLimits"
+          },
+          "operations": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "note.delete": "#/components/schemas/DeleteOp",
+                  "note.insert": "#/components/schemas/InsertOp",
+                  "note.update": "#/components/schemas/UpdateOp"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/UpdateOp"
+                },
+                {
+                  "$ref": "#/components/schemas/InsertOp"
+                },
+                {
+                  "$ref": "#/components/schemas/DeleteOp"
+                }
+              ]
+            },
+            "title": "Operations",
+            "type": "array"
+          },
+          "plan_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Plan Hash",
+            "type": "string"
+          },
+          "plan_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "ppq": {
+            "title": "Ppq",
+            "type": "integer"
+          },
+          "predicted_content_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Predicted Content Hash",
+            "type": "string"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "resolved_operations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Resolved Operations",
+            "type": "array"
+          },
+          "restores_receipt_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Restores Receipt Id"
+          },
+          "scope": {
+            "enum": [
+              "selected",
+              "all_exposed"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_label": {
+            "title": "Target Label",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "plan_id",
+          "session_id",
+          "target_id",
+          "target_label",
+          "snapshot_id",
+          "scope",
+          "ppq",
+          "base_state_hash",
+          "base_note_count",
+          "operations",
+          "resolved_operations",
+          "diff",
+          "limits",
+          "predicted_content_hash",
+          "rationale",
+          "created_by",
+          "created_at",
+          "expires_at",
+          "plan_hash"
+        ],
+        "title": "Plan",
+        "type": "object"
+      },
+      "PlanArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "plan_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Plan Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id"
+        ],
+        "title": "PlanArgs",
+        "type": "object"
+      },
+      "PlanLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "affected_notes": {
+            "title": "Affected Notes",
+            "type": "integer"
+          },
+          "delete_count": {
+            "title": "Delete Count",
+            "type": "integer"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "insert_count": {
+            "title": "Insert Count",
+            "type": "integer"
+          },
+          "max_operations": {
+            "title": "Max Operations",
+            "type": "integer"
+          },
+          "max_pitch_delta": {
+            "title": "Max Pitch Delta",
+            "type": "integer"
+          },
+          "max_time_delta_ticks": {
+            "title": "Max Time Delta Ticks",
+            "type": "integer"
+          },
+          "max_velocity_delta": {
+            "title": "Max Velocity Delta",
+            "type": "number"
+          },
+          "operation_count": {
+            "title": "Operation Count",
+            "type": "integer"
+          },
+          "update_count": {
+            "title": "Update Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "operation_count",
+          "max_operations",
+          "update_count",
+          "insert_count",
+          "delete_count",
+          "affected_notes",
+          "fields",
+          "max_pitch_delta",
+          "max_time_delta_ticks",
+          "max_velocity_delta"
+        ],
+        "title": "PlanLimits",
+        "type": "object"
+      },
+      "PlanPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "expired": {
+            "title": "Expired",
+            "type": "boolean"
+          },
+          "grant_coverage": {
+            "$ref": "#/components/schemas/GrantCoverage"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          },
+          "snapshot_is_latest": {
+            "title": "Snapshot Is Latest",
+            "type": "boolean"
+          },
+          "text_diff": {
+            "title": "Text Diff",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "plan",
+          "text_diff",
+          "warnings",
+          "expired",
+          "snapshot_is_latest",
+          "grant_coverage"
+        ],
+        "title": "PlanPreview",
+        "type": "object"
+      },
+      "ProjectSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProvenancedValue"
+            },
+            "title": "Fields",
+            "type": "object"
+          },
+          "partial": {
+            "const": true,
+            "default": true,
+            "title": "Partial",
+            "type": "boolean"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "fields"
+        ],
+        "title": "ProjectSummary",
+        "type": "object"
+      },
+      "ProposePatchArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "operations": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "note.delete": "#/components/schemas/DeleteOp",
+                  "note.insert": "#/components/schemas/InsertOp",
+                  "note.update": "#/components/schemas/UpdateOp"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/UpdateOp"
+                },
+                {
+                  "$ref": "#/components/schemas/InsertOp"
+                },
+                {
+                  "$ref": "#/components/schemas/DeleteOp"
+                }
+              ]
+            },
+            "maxItems": 1000,
+            "minItems": 1,
+            "title": "Operations",
+            "type": "array"
+          },
+          "rationale": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "operations",
+          "rationale"
+        ],
+        "title": "ProposePatchArgs",
+        "type": "object"
+      },
+      "ProvenancedValue": {
+        "additionalProperties": false,
+        "properties": {
+          "age_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Age Seconds"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Observed At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source"
+          },
+          "status": {
+            "enum": [
+              "available",
+              "unavailable",
+              "stale"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "value": {
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ProvenancedValue",
+        "type": "object"
+      },
+      "Receipt": {
+        "additionalProperties": false,
+        "properties": {
+          "after_content_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "After Content Hash",
+            "type": "string"
+          },
+          "after_snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "After Snapshot Id",
+            "type": "string"
+          },
+          "after_state_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "After State Hash",
+            "type": "string"
+          },
+          "applied_operation_count": {
+            "title": "Applied Operation Count",
+            "type": "integer"
+          },
+          "before_snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Before Snapshot Id",
+            "type": "string"
+          },
+          "before_state_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Before State Hash",
+            "type": "string"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/DiffRow"
+            },
+            "title": "Changes",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "job_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Job Id",
+            "type": "string"
+          },
+          "plan_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Plan Hash",
+            "type": "string"
+          },
+          "plan_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "receipt_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Receipt Id",
+            "type": "string"
+          },
+          "recovery_available": {
+            "title": "Recovery Available",
+            "type": "boolean"
+          },
+          "recovery_note": {
+            "title": "Recovery Note",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_label": {
+            "title": "Target Label",
+            "type": "string"
+          },
+          "verification": {
+            "const": "verified",
+            "title": "Verification",
+            "type": "string"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "job_id",
+          "plan_id",
+          "plan_hash",
+          "target_id",
+          "target_label",
+          "before_snapshot_id",
+          "before_state_hash",
+          "after_snapshot_id",
+          "after_state_hash",
+          "after_content_hash",
+          "applied_operation_count",
+          "verification",
+          "recovery_available",
+          "recovery_note",
+          "changes",
+          "created_at"
+        ],
+        "title": "Receipt",
+        "type": "object"
+      },
+      "RequiredAction": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Actor",
+            "type": "string"
+          },
+          "instruction": {
+            "title": "Instruction",
+            "type": "string"
+          },
+          "request_short_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Short Id"
+          },
+          "script": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Script"
+          },
+          "where": {
+            "enum": [
+              "fl_piano_roll",
+              "companion_ui",
+              "agent"
+            ],
+            "title": "Where",
+            "type": "string"
+          }
+        },
+        "required": [
+          "actor",
+          "where",
+          "instruction"
+        ],
+        "title": "RequiredAction",
+        "type": "object"
+      },
+      "RestoreEditArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "receipt_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Receipt Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "receipt_id",
+          "idempotency_key"
+        ],
+        "title": "RestoreEditArgs",
+        "type": "object"
+      },
+      "Selection": {
+        "additionalProperties": false,
+        "properties": {
+          "exposed_count": {
+            "title": "Exposed Count",
+            "type": "integer"
+          },
+          "selected_count": {
+            "title": "Selected Count",
+            "type": "integer"
+          },
+          "selected_note_ids": {
+            "items": {
+              "description": "Snapshot-local note id",
+              "pattern": "^n[0-9]{1,5}$",
+              "type": "string"
+            },
+            "title": "Selected Note Ids",
+            "type": "array"
+          },
+          "timeline": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Timeline"
+          }
+        },
+        "required": [
+          "selected_count",
+          "exposed_count",
+          "selected_note_ids"
+        ],
+        "title": "Selection",
+        "type": "object"
+      },
+      "SessionArgs": {
+        "additionalProperties": false,
+        "properties": {
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "SessionArgs",
+        "type": "object"
+      },
+      "SessionInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "adapter_epoch": {
+            "title": "Adapter Epoch",
+            "type": "integer"
+          },
+          "capabilities": {
+            "items": {
+              "$ref": "#/components/schemas/Capability"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "fl_host": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fl Host"
+          },
+          "identity_strength": {
+            "enum": [
+              "verified",
+              "user_attested",
+              "none"
+            ],
+            "title": "Identity Strength",
+            "type": "string"
+          },
+          "invalidated_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Invalidated Reason"
+          },
+          "last_fl_contact_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Last Fl Contact At"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "retired",
+              "invalidated"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "adapter_epoch",
+          "status",
+          "identity_strength",
+          "created_at"
+        ],
+        "title": "SessionInfo",
+        "type": "object"
+      },
+      "Snapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "captured_at": {
+            "format": "date-time",
+            "title": "Captured At",
+            "type": "string"
+          },
+          "content_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "coverage": {
+            "const": "exposed_score",
+            "default": "exposed_score",
+            "title": "Coverage",
+            "type": "string"
+          },
+          "default_note": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Default Note"
+          },
+          "extra_note_attributes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Extra Note Attributes",
+            "type": "array"
+          },
+          "freshness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Freshness"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "host": {
+            "additionalProperties": true,
+            "title": "Host",
+            "type": "object"
+          },
+          "in_scope_count": {
+            "title": "In Scope Count",
+            "type": "integer"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Job Id"
+          },
+          "markers": {
+            "items": {
+              "$ref": "#/components/schemas/Marker"
+            },
+            "title": "Markers",
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "$ref": "#/components/schemas/Note"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "ppq": {
+            "title": "Ppq",
+            "type": "integer"
+          },
+          "purpose": {
+            "enum": [
+              "capture",
+              "verify",
+              "adhoc"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "received_at": {
+            "format": "date-time",
+            "title": "Received At",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "selected",
+              "all_exposed"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/Selection"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "state_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "State Hash",
+            "type": "string"
+          },
+          "supported_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Fields",
+            "type": "array"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Target"
+          },
+          "time_signature": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Time Signature"
+          },
+          "unsupported_fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Unsupported Fields",
+            "type": "object"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "session_id",
+          "target",
+          "purpose",
+          "captured_at",
+          "received_at",
+          "scope",
+          "ppq",
+          "notes",
+          "markers",
+          "selection",
+          "in_scope_count",
+          "supported_fields",
+          "state_hash",
+          "content_hash"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      },
+      "Target": {
+        "additionalProperties": false,
+        "properties": {
+          "binding": {
+            "enum": [
+              "verified",
+              "user_attested"
+            ],
+            "title": "Binding",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "observed": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Observed",
+            "type": "object"
+          },
+          "session_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_id",
+          "session_id",
+          "binding",
+          "label"
+        ],
+        "title": "Target",
+        "type": "object"
+      },
+      "ToolResult_Analysis_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Analysis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[Analysis]",
+        "type": "object"
+      },
+      "ToolResult_CapabilitiesView_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CapabilitiesView"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[CapabilitiesView]",
+        "type": "object"
+      },
+      "ToolResult_JobView_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobView"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[JobView]",
+        "type": "object"
+      },
+      "ToolResult_Job_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Job"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[Job]",
+        "type": "object"
+      },
+      "ToolResult_NoArgs_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NoArgs"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[NoArgs]",
+        "type": "object"
+      },
+      "ToolResult_PlanPreview_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanPreview"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[PlanPreview]",
+        "type": "object"
+      },
+      "ToolResult_Plan_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Plan"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[Plan]",
+        "type": "object"
+      },
+      "ToolResult_ProjectSummary_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[ProjectSummary]",
+        "type": "object"
+      },
+      "ToolResult_Snapshot_": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Snapshot"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "request_id"
+        ],
+        "title": "ToolResult[Snapshot]",
+        "type": "object"
+      },
+      "UpdateOp": {
+        "additionalProperties": false,
+        "properties": {
+          "note_id": {
+            "description": "Snapshot-local note id",
+            "pattern": "^n[0-9]{1,5}$",
+            "title": "Note Id",
+            "type": "string"
+          },
+          "op": {
+            "const": "note.update",
+            "title": "Op",
+            "type": "string"
+          },
+          "set": {
+            "$ref": "#/components/schemas/NoteSet"
+          }
+        },
+        "required": [
+          "op",
+          "note_id",
+          "set"
+        ],
+        "title": "UpdateOp",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Protocol flslacker/1. Loopback only; bearer token required.",
+    "title": "FL Slacker companion API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/capabilities": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_CapabilitiesView_"
+                }
+              }
+            },
+            "description": "Capabilities"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Tested session capabilities"
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Minimal process health"
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_JobView_"
+                }
+              }
+            },
+            "description": "Job"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Job status and required user action"
+      }
+    },
+    "/v1/jobs/{job_id}/cancel": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Cancellation status"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Cancel queued work (owning client)"
+      }
+    },
+    "/v1/schema": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Bundle"
+          }
+        },
+        "summary": "Machine-readable contracts"
+      }
+    },
+    "/v1/tools/fls_analyze_score": {
+      "post": {
+        "operationId": "fls_analyze_score",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeScoreArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_Analysis_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Deterministic analysis of a snapshot: motifs, ranked key/chord hypotheses and likely pitch outliers. Findings are suggestions with evidence, not certainty. key_hint is treated as a user constraint; an inferred key is only a hypothesis.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_apply_plan": {
+      "post": {
+        "operationId": "fls_apply_plan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyPlanArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_Job_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Request application of an immutable plan; may require an FL-side action. Needs an existing grant (PERMISSION_DENIED otherwise: ask the user to approve in the FL Slacker UI). Returns a job; the edit is only done when fls_get_job reports state 'applied' with a verified receipt.",
+        "x-permission": "scoped_write"
+      }
+    },
+    "/v1/tools/fls_cancel_job": {
+      "post": {
+        "operationId": "fls_cancel_job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_JobView_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Cancel queued work you created. Succeeds only before FL acts; it never rolls back an edit.",
+        "x-permission": "owning_client"
+      }
+    },
+    "/v1/tools/fls_capture_score": {
+      "post": {
+        "operationId": "fls_capture_score",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureScoreArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_Job_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Request a fresh capture of the notes FL exposes in the Piano Roll. scope must be chosen explicitly: 'selected' (an empty selection captures nothing) or 'all_exposed'. Returns a job in state awaiting_fl_action: tell the user the exact next_action and poll fls_get_job.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_get_capabilities": {
+      "post": {
+        "operationId": "fls_get_capabilities",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_CapabilitiesView_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Discover what this FL Studio build and session can do. Call first. Capabilities with supported=false must be reported to the user as unavailable, not worked around.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_get_job": {
+      "post": {
+        "operationId": "fls_get_job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_JobView_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Job status, the exact user action required next, errors, and the receipt once verified. Poll with bounded backoff.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_get_project_summary": {
+      "post": {
+        "operationId": "fls_get_project_summary",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_ProjectSummary_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Partial project summary. Every field carries status, source and age; report 'unavailable' fields as unknown instead of guessing.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_get_snapshot": {
+      "post": {
+        "operationId": "fls_get_snapshot",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSnapshotArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_Snapshot_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Read an immutable captured snapshot. It is cached data; check freshness before relying on it. note_id values are only valid within this snapshot.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_preview_plan": {
+      "post": {
+        "operationId": "fls_preview_plan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_PlanPreview_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Show a plan's exact diff, limits, warnings, staleness and whether an existing grant covers it.",
+        "x-permission": "read"
+      }
+    },
+    "/v1/tools/fls_propose_patch": {
+      "post": {
+        "operationId": "fls_propose_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposePatchArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_Plan_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Validate operations (note.update / note.insert / note.delete) against a snapshot and create an immutable plan with an exact diff and plan_hash. Propose the smallest patch that satisfies the request. Proposing never edits FL.",
+        "x-permission": "propose"
+      }
+    },
+    "/v1/tools/fls_restore_edit": {
+      "post": {
+        "operationId": "fls_restore_edit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreEditArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolResult_Job_"
+                }
+              }
+            },
+            "description": "Result envelope"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "INVALID_ARGUMENT / UNSUPPORTED_CAPABILITY"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid bearer token"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "PERMISSION_DENIED"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "STALE_SNAPSHOT, TARGET_MISMATCH, BUSY, USER_ACTION_REQUIRED, conflicts"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "EXPIRED"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "LIMIT_EXCEEDED"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "ADAPTER_OFFLINE / MODEL_UNAVAILABLE"
+          }
+        },
+        "summary": "Build and request a guarded inverse plan for a verified receipt. Only works while the score still equals the recorded after-state; it is not a global Undo. Needs a covering grant.",
+        "x-permission": "scoped_write"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8765"
+    }
+  ]
+}

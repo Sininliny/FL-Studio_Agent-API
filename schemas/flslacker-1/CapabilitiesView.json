@@ -1,0 +1,238 @@
+{
+  "$defs": {
+    "Capability": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "title": "Execution",
+          "type": "string"
+        },
+        "identity": {
+          "title": "Identity",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "scope": {
+          "title": "Scope",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "supported",
+            "unavailable",
+            "not_connected",
+            "requires_user_action"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "supported": {
+          "title": "Supported",
+          "type": "boolean"
+        },
+        "verified_build": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verified Build"
+        }
+      },
+      "required": [
+        "name",
+        "supported",
+        "status",
+        "execution",
+        "scope",
+        "identity"
+      ],
+      "title": "Capability",
+      "type": "object"
+    },
+    "SessionInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_epoch": {
+          "title": "Adapter Epoch",
+          "type": "integer"
+        },
+        "capabilities": {
+          "items": {
+            "$ref": "#/$defs/Capability"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "fl_host": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fl Host"
+        },
+        "identity_strength": {
+          "enum": [
+            "verified",
+            "user_attested",
+            "none"
+          ],
+          "title": "Identity Strength",
+          "type": "string"
+        },
+        "invalidated_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Invalidated Reason"
+        },
+        "last_fl_contact_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Fl Contact At"
+        },
+        "session_id": {
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "retired",
+            "invalidated"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "adapter_epoch",
+        "status",
+        "identity_strength",
+        "created_at"
+      ],
+      "title": "SessionInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "active_session": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SessionInfo"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "bridge": {
+      "additionalProperties": true,
+      "title": "Bridge",
+      "type": "object"
+    },
+    "capabilities": {
+      "items": {
+        "$ref": "#/$defs/Capability"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "companion_version": {
+      "title": "Companion Version",
+      "type": "string"
+    },
+    "compatibility_record": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Compatibility Record"
+    },
+    "fl_build": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Fl Build"
+    },
+    "protocol": {
+      "title": "Protocol",
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol",
+    "companion_version",
+    "fl_build",
+    "compatibility_record",
+    "active_session",
+    "capabilities",
+    "bridge"
+  ],
+  "title": "CapabilitiesView",
+  "type": "object"
+}

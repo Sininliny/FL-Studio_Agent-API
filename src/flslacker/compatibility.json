@@ -1,0 +1,37 @@
+{
+  "format": "flslacker-compatibility/1",
+  "records": [
+    {
+      "record_id": "win-fl-26.1.6.5639-docs-2026-09-17",
+      "fl_build": "26.1.6.5639",
+      "os": "Windows 11 Pro 10.0.26200",
+      "os_family": "windows",
+      "embedded_python": "3.12.1",
+      "adapter_version": "0.1.0",
+      "midi_api_version": null,
+      "recorded_at": "2026-09-17",
+      "evidence": [
+        "Installed reference: <FL>/System/Config/Piano roll scripts/Piano roll script reference.txt lists getTimelineSelection, setTimelineSelection, getDefaultNoteProperties, getNextFreeGroupIndex, addInputSurface and Note.clone().",
+        "Factory scripts use flp.Note(), note.clone(), score.addNote(), ScriptDialog.AddInputCombo/AddInputCheckbox/AddInputKnob(Int) and GetInputValue.",
+        "<FL>/Shared/Python/python.exe 3.12.1 (standalone, outside FL) imports json, hmac, hashlib, os, uuid, tempfile, time, secrets, ctypes.",
+        "tests/embedded_smoke.py passes on that interpreter with a mocked flpianoroll module (mailbox write, claim, capture/apply round trip)."
+      ],
+      "not_evidence": "No script has been run inside FL Studio for this record. Mocks cannot certify compatibility.",
+      "stdlib_modules": {"json": true, "hmac": true, "hashlib": true, "os": true, "uuid": true, "calendar": true, "ctypes": true},
+      "selection_semantics": "unverified",
+      "bridge_transport": "mailbox_file: unverified inside FL",
+      "preview_cancel": "unverified (scripts use the explicit top-level path with ScriptDialog.execute())",
+      "undo": "unverified",
+      "identity_strength": "user_attested",
+      "capabilities": {
+        "bridge.mailbox": {"status": "unverified"},
+        "notes.capture": {"status": "unverified"},
+        "notes.verify": {"status": "unverified"},
+        "notes.patch.update": {"status": "unverified"},
+        "notes.patch.insert": {"status": "unverified"},
+        "notes.patch.delete": {"status": "unverified"},
+        "project.metadata": {"status": "unverified"}
+      }
+    }
+  ]
+}

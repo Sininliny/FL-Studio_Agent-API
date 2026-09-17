@@ -1,0 +1,150 @@
+{
+  "$defs": {
+    "GrantConstraints": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "max_notes": {
+          "default": 16,
+          "description": "Change budget: total notes this grant may touch",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Notes",
+          "type": "integer"
+        },
+        "max_pitch_delta": {
+          "anyOf": [
+            {
+              "maximum": 127,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 2,
+          "title": "Max Pitch Delta"
+        },
+        "max_time_delta_ticks": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Time Delta Ticks"
+        },
+        "max_velocity_delta": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Velocity Delta"
+        },
+        "operation_kinds": {
+          "items": {
+            "enum": [
+              "note.update",
+              "note.insert",
+              "note.delete"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Operation Kinds",
+          "type": "array"
+        },
+        "scope": {
+          "default": "selected",
+          "enum": [
+            "selected",
+            "all_exposed"
+          ],
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "title": "GrantConstraints",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analyses": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Analyses",
+      "type": "array"
+    },
+    "constraints": {
+      "$ref": "#/$defs/GrantConstraints"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "lifetime_minutes": {
+      "default": 10,
+      "maximum": 240,
+      "minimum": 1,
+      "title": "Lifetime Minutes",
+      "type": "integer"
+    },
+    "min_confidence": {
+      "default": 0.6,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Min Confidence",
+      "type": "number"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "title": "Parameters",
+      "type": "object"
+    },
+    "recipe_id": {
+      "pattern": "^[a-z0-9_-]{1,40}$",
+      "title": "Recipe Id",
+      "type": "string"
+    },
+    "scope": {
+      "default": "selected",
+      "enum": [
+        "selected",
+        "all_exposed"
+      ],
+      "title": "Scope",
+      "type": "string"
+    }
+  },
+  "required": [
+    "recipe_id",
+    "name",
+    "description"
+  ],
+  "title": "Recipe",
+  "type": "object"
+}

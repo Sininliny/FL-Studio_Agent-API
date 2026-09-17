@@ -1,0 +1,106 @@
+{
+  "format": "flslacker-canonical-vectors/1",
+  "rules": "sorted keys; separators , and :; ASCII escapes; Python float repr; -0.0 -> 0.0; NaN/Infinity rejected",
+  "values": [
+    {
+      "input": {
+        "b": 1,
+        "a": [
+          true,
+          false,
+          null
+        ],
+        "c": {
+          "z": 0.1,
+          "y": -0.0,
+          "x": 1e+21,
+          "w": 1.0
+        }
+      },
+      "canonical": "{\"a\":[true,false,null],\"b\":1,\"c\":{\"w\":1.0,\"x\":1e+21,\"y\":0.0,\"z\":0.1}}",
+      "sha256": "d3f57d49bdc77f0442044e11f37eb95c437dc3e1dc7e79aef225dab6469a8bcf"
+    },
+    {
+      "input": "Motif ♪ \"quoted\" \\ back",
+      "canonical": "\"Motif \\u266a \\\"quoted\\\" \\\\ back\"",
+      "sha256": "383dd89e041fc28572785b4ff28513aa3e4d4469ec0a8dba2b732249e1b3e12a"
+    },
+    {
+      "input": [
+        3,
+        2.5,
+        1e-07,
+        -12,
+        12345678901234567890
+      ],
+      "canonical": "[3,2.5,1e-07,-12,12345678901234567890]",
+      "sha256": "e6b646ee01b8cf8deca0c4578bb437d083227d6a977914d2a727df8b25f9e39e"
+    }
+  ],
+  "notes": {
+    "records": [
+      {
+        "number": 60,
+        "time": 0,
+        "length": 96,
+        "group": 0,
+        "pan": 0.5,
+        "velocity": 0.78125,
+        "release": 0.5,
+        "color": 0,
+        "fcut": 0.5,
+        "fres": 0.5,
+        "pitchofs": 0,
+        "slide": false,
+        "porta": false,
+        "muted": false,
+        "selected": true,
+        "repeats": 0
+      },
+      {
+        "number": 64,
+        "time": 96,
+        "length": 96,
+        "group": 0,
+        "pan": -0.0,
+        "velocity": 0.1,
+        "release": 0.5,
+        "color": 0,
+        "fcut": 0.5,
+        "fres": 0.5,
+        "pitchofs": 0,
+        "slide": false,
+        "porta": false,
+        "muted": false,
+        "selected": true,
+        "repeats": 0
+      }
+    ],
+    "fingerprints": [
+      "da88817e4d864252141c94159da45aea757ccc6e0dea74e3d80bb79356afa48b",
+      "cb37879af10756b4cefd5db2e211a9588d5d65287a17d36b6b4b0e7678f39a54"
+    ],
+    "markers": [
+      {
+        "time": 0,
+        "name": "Intro é",
+        "mode": 0,
+        "tsnum": 4,
+        "tsden": 4
+      }
+    ],
+    "ppq": 96,
+    "state_hash": "d054d0791c310ea58ca860188414c0280b1cc911372c80f5020a1960eac58f9d",
+    "state_hash_reordered": "e8685bf83c68aeccd50ba56272babb61acc763c02b8ff1d231df572e41865a3d",
+    "content_hash": "c25151ff7a0c5ecc5342fbfdf681bf3efcce2908543dac3dc4235368a254b47d",
+    "content_hash_reordered_unselected": "c25151ff7a0c5ecc5342fbfdf681bf3efcce2908543dac3dc4235368a254b47d"
+  },
+  "hmac": {
+    "secret": "0000000000000000000000000000000000000000000000000000000000000000",
+    "value": {
+      "kind": "test",
+      "n": 1
+    },
+    "tag": "3384949bac2dacf5a31349d20ddd5fa4cb198925f2b397bf069fa1a1562a6e1e"
+  }
+}

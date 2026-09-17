@@ -1,0 +1,22 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "note_id": {
+      "description": "Snapshot-local note id",
+      "pattern": "^n[0-9]{1,5}$",
+      "title": "Note Id",
+      "type": "string"
+    },
+    "op": {
+      "const": "note.delete",
+      "title": "Op",
+      "type": "string"
+    }
+  },
+  "required": [
+    "op",
+    "note_id"
+  ],
+  "title": "DeleteOp",
+  "type": "object"
+}

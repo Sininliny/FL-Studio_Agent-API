@@ -1,0 +1,117 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "duration_tick": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Duration Tick"
+    },
+    "fingerprint": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Fingerprint",
+      "type": "string"
+    },
+    "fl": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "description": "All other readable FL properties in native units",
+      "title": "Fl",
+      "type": "object"
+    },
+    "in_scope": {
+      "title": "In Scope",
+      "type": "boolean"
+    },
+    "note_id": {
+      "description": "Snapshot-local note id",
+      "pattern": "^n[0-9]{1,5}$",
+      "title": "Note Id",
+      "type": "string"
+    },
+    "ordinal": {
+      "title": "Ordinal",
+      "type": "integer"
+    },
+    "pitch": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Pitch"
+    },
+    "start_tick": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Start Tick"
+    },
+    "velocity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Velocity"
+    }
+  },
+  "required": [
+    "note_id",
+    "ordinal",
+    "pitch",
+    "start_tick",
+    "duration_tick",
+    "velocity",
+    "fl",
+    "in_scope",
+    "fingerprint"
+  ],
+  "title": "Note",
+  "type": "object"
+}

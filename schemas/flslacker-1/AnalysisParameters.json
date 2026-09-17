@@ -1,0 +1,119 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "allow_overlap": {
+      "default": false,
+      "title": "Allow Overlap",
+      "type": "boolean"
+    },
+    "chord_window_beats": {
+      "default": 4,
+      "maximum": 16,
+      "minimum": 1,
+      "title": "Chord Window Beats",
+      "type": "integer"
+    },
+    "exclude_note_ids": {
+      "items": {
+        "description": "Snapshot-local note id",
+        "pattern": "^n[0-9]{1,5}$",
+        "type": "string"
+      },
+      "title": "Exclude Note Ids",
+      "type": "array"
+    },
+    "in_scope_only": {
+      "default": true,
+      "title": "In Scope Only",
+      "type": "boolean"
+    },
+    "key_hint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "User-specified key such as 'C major'; treated as a constraint",
+      "title": "Key Hint"
+    },
+    "max_findings": {
+      "default": 50,
+      "maximum": 500,
+      "minimum": 1,
+      "title": "Max Findings",
+      "type": "integer"
+    },
+    "max_motif_notes": {
+      "default": 12,
+      "maximum": 64,
+      "minimum": 3,
+      "title": "Max Motif Notes",
+      "type": "integer"
+    },
+    "min_motif_notes": {
+      "default": 4,
+      "maximum": 32,
+      "minimum": 3,
+      "title": "Min Motif Notes",
+      "type": "integer"
+    },
+    "min_occurrences": {
+      "default": 2,
+      "maximum": 100,
+      "minimum": 2,
+      "title": "Min Occurrences",
+      "type": "integer"
+    },
+    "onset_tolerance_ticks": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Default: PPQ/8",
+      "title": "Onset Tolerance Ticks"
+    },
+    "pitch_range": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pitch Range"
+    },
+    "transpose_invariant": {
+      "default": true,
+      "title": "Transpose Invariant",
+      "type": "boolean"
+    },
+    "voice": {
+      "default": "skyline",
+      "enum": [
+        "skyline",
+        "all"
+      ],
+      "title": "Voice",
+      "type": "string"
+    }
+  },
+  "title": "AnalysisParameters",
+  "type": "object"
+}

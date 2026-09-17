@@ -1,0 +1,76 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "execution": {
+      "title": "Execution",
+      "type": "string"
+    },
+    "identity": {
+      "title": "Identity",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "scope": {
+      "title": "Scope",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "supported",
+        "unavailable",
+        "not_connected",
+        "requires_user_action"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "supported": {
+      "title": "Supported",
+      "type": "boolean"
+    },
+    "verified_build": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Verified Build"
+    }
+  },
+  "required": [
+    "name",
+    "supported",
+    "status",
+    "execution",
+    "scope",
+    "identity"
+  ],
+  "title": "Capability",
+  "type": "object"
+}
